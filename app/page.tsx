@@ -25,27 +25,37 @@ export default function Home() {
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       // Add user message to conversation
-      const chatHistory = [...conversation, {role:"user", content:value}];
+      const chatHistory = [...conversation, { role: "user", content: value }];
 
       // Response from AI Assistant service (API)
-      const response = await fetch("/api/aichatbot",{
+      console.log("test question front", value)
+      const response = await fetch("/api/aichatbot", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: chatHistory
-        }
-        )
-      })
+          // question: chatHistory,
+          question: "what is the average temperature",
+        }),
+      });
 
       const data = await response.json();
+      console.log("Final resttt", data.data.finalRes);
+
       setValue("");
-      setConversation([...chatHistory,
-        {role:"assistant", content:data.result.choices[0].message.content}
-      ])
+      setConversation([
+        ...chatHistory,
+        { role: "assistant", content: data.data.finalRes },
+      ]);
     }
   };
+
+  const handleRefresh = ()=>{
+    inputRef.current?.focus();
+    setValue("");
+    setConversation([]);
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -63,14 +73,44 @@ export default function Home() {
 
       {/* Section: Chat */}
       <div className="w-full flex flex-col items-center justify-center">
+        {/* Label */}
         <p>Please type your question</p>
+        {/* User input */}
         <input
           placeholder="Type here"
           className="w-full max-w-2xl input input-bordered input-secondary"
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-        ></input>
+        />
+        <button className="btn btn-primary btn-xl my-6">Start new conversation</button>
+        {/* Conversation */}
+        <div className="textarea">
+          {conversation.map((item, index) => {
+            return (
+              <React.Fragment key={index}>
+                <br />
+                {item.role === "assistant" ? (
+                  <div className="chat chat-end">
+                    <div className="chat-bubble chat-bubble-secondary">
+                      <strong className="badge badge-primary">Bot</strong>
+                    </div>
+                    <br />
+                    {item?.content}
+                  </div>
+                ) : (
+                  <div className="chat chat-start">
+                    <div className="chat-bubble chat-bubble-primary">
+                      <strong className="badge badge-primary">User</strong>
+                      <br />
+                      {item?.content}
+                    </div>
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
       </div>
     </main>
   );
