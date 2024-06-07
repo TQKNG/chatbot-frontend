@@ -28,7 +28,7 @@ export default function Home() {
       const chatHistory = [...conversation, { role: "user", content: value }];
 
       // Response from AI Assistant service (API)
-      console.log("test question front", value)
+      console.log("test question front", value);
       const response = await fetch("/api/aichatbot", {
         method: "POST",
         headers: {
@@ -36,7 +36,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           // question: chatHistory,
-          question: "what is the average temperature",
+          question: value,
         }),
       });
 
@@ -51,66 +51,73 @@ export default function Home() {
     }
   };
 
-  const handleRefresh = ()=>{
+  const handleRefresh = () => {
     inputRef.current?.focus();
     setValue("");
     setConversation([]);
-  }
+  };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-between p-10">
       {/* Section: Welcome Hero */}
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="My Chatbot"
-          width={180}
-          height={37}
-          priority
-        />
+      <div className="">
+        <div className="">
+          <Image
+            className="relative"
+            src="/chatbot.png"
+            alt="My Chatbot"
+            width={500}
+            height={500}
+            priority
+          />
+        </div>
+      </div>
+
+      {/* Conversation */}
+      <div className="textarea d-flex w-full max-w-4xl  max-h-[400px] overflow-auto mb-">
+        {conversation.map((item, index) => {
+          return (
+            <React.Fragment key={index}>
+              <br />
+              {item.role === "assistant" ? (
+                <div className="chat chat-end">
+                  <div className="chat-bubble max-w-[400px]">
+                    <strong className="badge bg-aquaTurquoise text-black">Bot</strong>
+                    <div className="flex w-100 align-center justify-start">
+                      {item?.content}
+                    </div>
+                  </div>
+                  <br />
+                </div>
+              ) : (
+                <div className="chat chat-start">
+                  <div className="chat-bubble bg-aquaTurquoise text-black max-w-[400px]">
+                    <strong className="badge ">User</strong>
+                    <br />
+                    {item?.content}
+                  </div>
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
       </div>
 
       {/* Section: Chat */}
       <div className="w-full flex flex-col items-center justify-center">
-        {/* Label */}
-        <p>Please type your question</p>
         {/* User input */}
         <input
-          placeholder="Type here"
-          className="w-full max-w-2xl input input-bordered input-secondary"
+          placeholder="Ask me anything about your database"
+          className="w-full max-w-4xl input input-bordered border-aquaTurquoise"
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
         />
-        <button className="btn btn-primary btn-xl my-6">Start new conversation</button>
-        {/* Conversation */}
-        <div className="textarea">
-          {conversation.map((item, index) => {
-            return (
-              <React.Fragment key={index}>
-                <br />
-                {item.role === "assistant" ? (
-                  <div className="chat chat-end">
-                    <div className="chat-bubble chat-bubble-secondary">
-                      <strong className="badge badge-primary">Bot</strong>
-                    </div>
-                    <br />
-                    {item?.content}
-                  </div>
-                ) : (
-                  <div className="chat chat-start">
-                    <div className="chat-bubble chat-bubble-primary">
-                      <strong className="badge badge-primary">User</strong>
-                      <br />
-                      {item?.content}
-                    </div>
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
+        <button className="btn btn-primary btn-xl my-6"
+          onClick={handleRefresh}
+        >
+          Start new conversation
+        </button>
       </div>
     </main>
   );
