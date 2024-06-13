@@ -41,12 +41,12 @@ export default function Home() {
       });
 
       const data = await response.json();
-      console.log("Final resttt", data.data.finalRes);
+      console.log("tesssssss", data);
 
       setValue("");
       setConversation([
         ...chatHistory,
-        { role: "assistant", content: data.data.finalRes },
+        { role: "assistant", content: data.data.data.output },
       ]);
     }
   };

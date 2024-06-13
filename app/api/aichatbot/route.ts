@@ -4,7 +4,7 @@ export async function POST(req:Request){
 
     console.log("test question", body)
 
-    const res = await fetch("http://localhost:8080/api/langchainassistant", {
+    const res = await fetch("http://localhost:8000/api/v1/askagent", {
         method:"POST",
         headers:{
             "Content-Type":"application/json"
@@ -17,7 +17,6 @@ export async function POST(req:Request){
     
     const data = await res.json()
 
-    console.log("tesssssss", data);
     
     return Response.json({data});
 }
