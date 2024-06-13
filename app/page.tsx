@@ -25,7 +25,14 @@ export default function Home() {
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       // Add user message to conversation
-      const chatHistory = [...conversation, { role: "user", content: value }];
+      const chatHistory = [
+        ...conversation,
+        { role: "user", content: value },
+        { role: "assistant", content: "" },
+      ];
+
+      setValue("");
+      setConversation([...chatHistory]);
 
       // Response from AI Assistant service (API)
       console.log("test question front", value);
@@ -43,11 +50,15 @@ export default function Home() {
       const data = await response.json();
       console.log("tesssssss", data);
 
-      setValue("");
-      setConversation([
-        ...chatHistory,
-        { role: "assistant", content: data.data.data.output },
-      ]);
+      // Add response to conversation
+      setConversation((prev) => 
+        prev.map((item, index) => {
+          if (item.role === "assistant" && index === prev.length - 1) {
+            return { ...item, content: data.data.data.output };
+          }
+          return item;
+        })
+      );
     }
   };
 
@@ -81,11 +92,17 @@ export default function Home() {
               <br />
               {item.role === "assistant" ? (
                 <div className="chat chat-end">
-                  <div className="chat-bubble max-w-[400px]">
-                    <strong className="badge bg-aquaTurquoise text-black">Bot</strong>
-                    <div className="flex w-100 align-center justify-start">
-                      {item?.content}
-                    </div>
+                  <div className="flex flex-col chat-bubble max-w-[400px]">
+                    <strong className="badge bg-aquaTurquoise text-black">
+                      Bot
+                    </strong>
+                    {item.content === "" ? (
+                      <span className="loading loading-dots loading-sm"></span>
+                    ) : (
+                      <div className="flex w-100 align-center justify-start">
+                        {item?.content}
+                      </div>
+                    )}
                   </div>
                   <br />
                 </div>
@@ -94,7 +111,8 @@ export default function Home() {
                   <div className="chat-bubble bg-aquaTurquoise text-black max-w-[400px]">
                     <strong className="badge ">User</strong>
                     <br />
-                    {item?.content}
+
+                    <div>{item?.content}</div>
                   </div>
                 </div>
               )}
@@ -113,9 +131,7 @@ export default function Home() {
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
         />
-        <button className="btn btn-primary btn-xl my-6"
-          onClick={handleRefresh}
-        >
+        <button className="btn btn-primary btn-xl my-6" onClick={handleRefresh}>
           Start new conversation
         </button>
       </div>
