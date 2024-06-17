@@ -6,7 +6,12 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "ChatBOK - AI Chatbot",
-  description: "Created and Powered by Khanh Nguyen",
+  applicationName: "SQL Agent Chatbot",
+  description: "A customize SQL Agent Chatbot that can help you to query your database with natural language",
+  authors: [{name:"Khanh Nguyen"}],
+  icons:{
+    icon:"/logo.png"
+  }
 };
 
 export default function RootLayout({
