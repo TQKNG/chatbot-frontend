@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
-import React, { ReactEventHandler, useRef } from "react";
+import React, { useRef } from "react";
+import CollapseMenu from "./components/CollapseMenu";
 
 // Types
 interface Conversation {
@@ -100,6 +101,7 @@ export default function Home() {
     );
   };
 
+  // Handle reset conversation
   const handleRefresh = () => {
     inputRef.current?.focus();
     setValue("");
@@ -107,108 +109,135 @@ export default function Home() {
   };
 
   return (
-    <main className="w-full flex min-h-screen flex-col items-center justify-between p-10">
-      {/* Edit Button */}
-      <div className="w-full">
-        <Image
-          className="cursor-pointer hover:opacity-80"
-          src="/icon-edit.png"
-          alt="btn-edit"
-          width={100}
-          height={100}
-          priority
-          onClick={handleRefresh}
-        />
-      </div>
-      {/* Section: Welcome Hero */}
-      {conversation && conversation.length === 0 ? (
-        <div className="w-full flex justify-center items-center my-0">
-          <Image
-            className="relative"
-            src="/logo-v2.png"
-            alt="My Chatbot"
-            width={250}
-            height={250}
-            priority
-          />
+    <main className="w-full flex max-h-screen flex-col items-center justify-between overflow-hidden p-10">
+      {/* Layout */}
+      <div className="w-full h-screen grid md:grid-cols-12 gap-2">
+        {/* Left-side panel*/}
+        <div className="col-span-3 bg-gray-700 p-10 rounded-md">
+          {/*New Chat */}
+          <div className="flex items-center justify-start gap-4 w-full cursor-pointer hover:text-aquaTurquoise text-white"
+            onClick={handleRefresh}
+          >
+            {/* Edit icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+              />
+            </svg>
+
+            <div>New Conversation</div>
+          </div>
+          {/* Section: Database Connection */}
+          <div>
+            <CollapseMenu/>
+          </div>
         </div>
-      ) : (
-        <div className="textarea d-flex w-full max-w-4xl  max-h-[700px] overflow-auto mb-2">
-          {conversation.map((item, index) => {
-            return (
-              <React.Fragment key={index}>
-                <br />
-                {item.role === "assistant" ? (
-                  <div className="chat chat-end">
-                    <div className="chat-image avatar">
-                      <div className="w-10 rounded-full">
-                        <img
-                          alt="Tailwind CSS chat bubble component"
-                          src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col chat-bubble max-w-[400px]">
-                      <strong className="badge bg-aquaTurquoise text-black">
-                        ChatBOK
-                      </strong>
-                      {item.content === "" ? (
-                        <span className="loading loading-dots loading-sm"></span>
-                      ) : (
-                        <div className="flex w-100 align-center justify-start">
-                          {item?.content}
-                        </div>
-                      )}
-                    </div>
+
+        {/* Main Chat */}
+        <div className="flex flex-col justify-between col-span-6">
+          {/* Section: Welcome Hero */}
+          {conversation && conversation.length === 0 ? (
+            <div className="w-full flex justify-center items-center my-0">
+              <Image
+                className="relative"
+                src="/logo-v2.png"
+                alt="My Chatbot"
+                width={250}
+                height={250}
+                priority
+              />
+            </div>
+          ) : (
+            <div className="textarea d-flex w-full max-w-4xl  max-h-[700px] overflow-auto mb-2">
+              {conversation.map((item, index) => {
+                return (
+                  <React.Fragment key={index}>
                     <br />
-                  </div>
-                ) : (
-                  <div className="chat chat-start">
-                      <div className="chat-image avatar">
-                      <div className="w-10 rounded-full">
-                        <img
-                          alt="Tailwind CSS chat bubble component"
-                          src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
-                        />
+                    {item.role === "assistant" ? (
+                      <div className="chat chat-end">
+                        <div className="chat-image avatar">
+                          <div className="w-10 rounded-full">
+                            <img
+                              alt="Tailwind CSS chat bubble component"
+                              src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col chat-bubble max-w-[400px]">
+                          <strong className="badge bg-aquaTurquoise text-black">
+                            ChatBOK
+                          </strong>
+                          {item.content === "" ? (
+                            <span className="loading loading-dots loading-sm"></span>
+                          ) : (
+                            <div className="flex w-100 align-center justify-start">
+                              {item?.content}
+                            </div>
+                          )}
+                        </div>
+                        <br />
                       </div>
-                    </div>
-                    <div className="chat-bubble bg-aquaTurquoise text-black max-w-[400px]">
-                      <strong className="badge ">User</strong>
-                      <br />
+                    ) : (
+                      <div className="chat chat-start">
+                        <div className="chat-image avatar">
+                          <div className="w-10 rounded-full">
+                            <img
+                              alt="Tailwind CSS chat bubble component"
+                              src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                            />
+                          </div>
+                        </div>
+                        <div className="chat-bubble bg-aquaTurquoise text-black max-w-[400px]">
+                          <strong className="badge ">User</strong>
+                          <br />
 
-                      <div>{item?.content}</div>
-                    </div>
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
+                          <div>{item?.content}</div>
+                        </div>
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Section: Chat */}
+          <div className="w-full flex flex-col items-center justify-center">
+            {/* User input */}
+            <div className="relative flex justify-center items-center w-full max-w-4xl">
+              <input
+                placeholder="Ask me anything about your database"
+                className="w-full max-w-4xl input input-bordered border-aquaTurquoise"
+                value={value}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+              />
+
+              {/* Send Button */}
+              <Image
+                className="absolute cursor-pointer right-0 hover:opacity-80"
+                src="/icon-send.png"
+                alt="btn-send"
+                width={50}
+                height={50}
+                priority
+                onClick={handleSend}
+              />
+            </div>
+          </div>
         </div>
-      )}
 
-      {/* Section: Chat */}
-      <div className="w-full flex flex-col items-center justify-center">
-        {/* User input */}
-        <div className="relative flex justify-center items-center w-full max-w-4xl">
-          <input
-            placeholder="Ask me anything about your database"
-            className="w-full max-w-4xl input input-bordered border-aquaTurquoise"
-            value={value}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-          />
-
-          {/* Send Button */}
-          <Image
-            className="absolute cursor-pointer right-0 hover:opacity-80"
-            src="/icon-send.png"
-            alt="btn-send"
-            width={50}
-            height={50}
-            priority
-            onClick={handleSend}
-          />
-        </div>
+        {/* Right-side panel */}
+        <div className="col-span-3"></div>
       </div>
     </main>
   );
