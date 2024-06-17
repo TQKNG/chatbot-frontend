@@ -144,7 +144,7 @@ export default function Home() {
         </div>
 
         {/* Main Chat */}
-        <div className="flex flex-col justify-between col-span-6">
+        <div className="flex flex-col justify-between items-center col-span-9">
           {/* Section: Welcome Hero */}
           {conversation && conversation.length === 0 ? (
             // If no conversation, display logo hero and guiding question cards
@@ -195,7 +195,7 @@ export default function Home() {
         </div>
 
         {/* Right-side panel */}
-        <div className="col-span-3"></div>
+        {/* <div className="col-span-3"></div> */}
       </div>
     </main>
   );

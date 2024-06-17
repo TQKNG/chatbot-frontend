@@ -4,14 +4,17 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
+interface Icon{
+  rel: string;
+  url:string;
+}
+
 export const metadata: Metadata = {
   title: "ChatBOK - AI Chatbot",
   applicationName: "SQL Agent Chatbot",
   description: "A customize SQL Agent Chatbot that can help you to query your database with natural language",
   authors: [{name:"Khanh Nguyen"}],
-  icons:{
-    icon:"/logo.png"
-  }
+  
 };
 
 export default function RootLayout({
