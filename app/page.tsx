@@ -3,12 +3,40 @@ import Image from "next/image";
 import React, { useRef } from "react";
 import CollapseMenu from "./components/CollapseMenu";
 import Chat from "./components/Chat";
+import QuestionCard from "./components/QuestionCard";
 
 // Types
 interface Conversation {
   role: string;
   content: string;
 }
+
+type OptionType = "Historical Analysis" | "Predictive Analysis" | "Descriptive Analysis" | "Diagnostic Analysis" | "Prescriptive Analysis" | "Other";
+
+
+interface SampleQuestion{
+  type: OptionType[];
+  question:string;
+}
+
+const sampleQuestions: SampleQuestion[] = [
+  {
+    type: ["Historical Analysis"],
+    question: "What is temperature in March 2023 12pm?"
+  },
+  {
+    type: ["Predictive Analysis"],
+    question: "What will be the average temperature for next month?"
+  },
+  {
+    type: ["Descriptive Analysis"],
+    question: "What is the average temperature in March 2023?"
+  },
+  {
+    type: ["Diagnostic Analysis"],
+    question: "What could be the reason for the temperature drop in March 2023?"
+  },
+];
 
 export default function Home() {
   // States
@@ -110,11 +138,11 @@ export default function Home() {
   };
 
   return (
-    <main className="w-full flex max-h-screen flex-col items-center justify-between overflow-hidden p-10">
+    <main className="w-full flex max-h-screen flex-col items-center justify-between overflow-hidden p-10 bg-black">
       {/* Layout */}
       <div className="w-full h-screen grid md:grid-cols-12 gap-2">
         {/* Left-side panel*/}
-        <div className="col-span-3 bg-gray-700 p-10 rounded-md">
+        <div className="col-span-3 bg-secondary p-10 rounded-md">
           {/*New Chat */}
           <div className="flex items-center justify-start gap-4 w-full cursor-pointer hover:text-aquaTurquoise text-white"
             onClick={handleRefresh}
@@ -148,7 +176,7 @@ export default function Home() {
           {/* Section: Welcome Hero */}
           {conversation && conversation.length === 0 ? (
             // If no conversation, display logo hero and guiding question cards
-            <div className="w-full flex justify-center items-center my-0">
+            <div className="w-full flex flex-col justify-center items-center my-0 gap-3">
               <Image
                 className="relative"
                 src="/logo-v2.png"
@@ -157,12 +185,22 @@ export default function Home() {
                 height={250}
                 priority
               />
+
+              <div className="flex p-10 gap-5 ">
+              {sampleQuestions.map((item,index)=>{
+                return(
+                  <QuestionCard index={index} item={item} />
+                )
+              })}
+              </div>
+            
+           
             </div>
           ) : (
-            <div className="textarea d-flex w-full max-w-4xl  max-h-[700px] overflow-auto mb-2">
+            <div className="textarea d-flex w-full max-w-4xl bg-inherit max-h-[700px] overflow-auto mb-2">
               {conversation.map((item, index) => {
                 return (
-                  <Chat index={index} item={item}/>
+                  <Chat index={index} item={item} />
                 );
               })}
             </div>
@@ -174,7 +212,7 @@ export default function Home() {
             <div className="relative flex justify-center items-center w-full max-w-4xl">
               <input
                 placeholder="Ask me anything about your database"
-                className="w-full max-w-4xl input input-bordered border-aquaTurquoise"
+                className="w-full max-w-4xl input border-md bg-secondary"
                 value={value}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}

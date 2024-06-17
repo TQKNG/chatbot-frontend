@@ -17,6 +17,7 @@ const config: Config = {
         'sans': ['JetBrains Mono','Inter', 'sans-serif'],
       },
       colors: {
+        secondary: '#1e1f20',
         aquaTurquoise: '#66dcdd',
       },
     },

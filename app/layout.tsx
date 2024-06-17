@@ -4,11 +4,6 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-interface Icon{
-  rel: string;
-  url:string;
-}
-
 export const metadata: Metadata = {
   title: "ChatBOK - AI Chatbot",
   applicationName: "SQL Agent Chatbot",
