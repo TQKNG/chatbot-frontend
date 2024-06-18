@@ -1,8 +1,8 @@
 import React from 'react'
 
-const Chat = ({index,item}) => {
+const Chat = ({key,item}) => {
   return (
-    <React.Fragment key={index}>
+    <React.Fragment key={key}>
     <br />
     {item.role === "assistant" ? (
       <div className="chat chat-end">

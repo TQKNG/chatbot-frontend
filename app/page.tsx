@@ -189,7 +189,7 @@ export default function Home() {
               <div className="flex p-10 gap-5 ">
               {sampleQuestions.map((item,index)=>{
                 return(
-                  <QuestionCard index={index} item={item} />
+                  <QuestionCard key={index} item={item} />
                 )
               })}
               </div>
@@ -200,7 +200,7 @@ export default function Home() {
             <div className="textarea d-flex w-full max-w-4xl bg-inherit max-h-[700px] overflow-auto mb-2">
               {conversation.map((item, index) => {
                 return (
-                  <Chat index={index} item={item} />
+                  <Chat key={index} item={item} />
                 );
               })}
             </div>

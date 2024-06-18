@@ -1,8 +1,8 @@
 import React from "react";
 
-const QuestionCard = ({ index, item }) => {
+const QuestionCard = ({ key, item }) => {
   return (
-    <React.Fragment index={index}>
+    <React.Fragment key={key}>
       <div
         className={`card w-30 max-w-50 cursor-pointer text-white bg-secondary border-transparent hover:bg-slate-50 hover:text-black rounded-lg`}
       >

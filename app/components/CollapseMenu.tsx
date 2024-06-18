@@ -28,8 +28,8 @@ const CollapseMenu = () => {
         <div className="collapse-content text-sm flex flex-col  justify-start gap-4">
           {["Health", "Finance", "Education", "Stock"].map((item, index) => {
             return (
-              <React.Fragment>
-                <div className="flex justify-between">
+              <React.Fragment key={index}>
+                <div className="flex justify-between" >
                   {/* Database Name */}
                   <div className="flex items-center gap-2">
                     <svg

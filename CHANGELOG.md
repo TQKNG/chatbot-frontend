@@ -14,7 +14,13 @@
 - Bug 1
 - Bug 2
 
-## [1.0.0] - 2024-06-05
+## [0.1.0] - 2024-06-05
 
 ### Added
 - Initial release
+
+
+## [1.0.0] - 2024-06-05
+
+### Added
+- Version 1 release
