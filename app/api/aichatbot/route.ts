@@ -4,7 +4,16 @@ export async function POST(req:Request){
 
     console.log("test question", body)
 
-    const res = await fetch("http://localhost:8000/api/v1/askagent", {
+    /*
+    Production API service
+    https://intelligenceservice.azurewebsites.net/api/v1/askagent
+
+
+    Development API service
+    http://localhost:8000/api/v1/askagent
+
+    */
+    const res = await fetch(" https://intelligenceservice.azurewebsites.net/api/v1/askagent", {
         method:"POST",
         headers:{
             "Content-Type":"application/json"
