@@ -11,13 +11,13 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
 
       - name: Set up Node.js version
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v2
         with:
           node-version: '20.x'
 
@@ -27,21 +27,19 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
-      - name: Move build folder
+      - name: Prepare artifact for deployment
         run: |
-          mkdir build\standalone\build
-          move build\static build\standalone\build
-          move public build\standalone
-
-      - name: Zip artifact for deployment
-        run: |
-          Compress-Archive -Path .\build\standalone\* -DestinationPath .\release.zip
+          mkdir -p deploy
+          cp -r .next deploy
+          cp -r public deploy
+          cd deploy
+          zip -r deploy.zip .
             
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
         with:
-          name: node-app
-          path: .
+          name: deploy
+          path: deploy/deploy.zip
 
 
   deploy:
@@ -53,9 +51,10 @@ jobs:
     
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v2
         with:
-          name: node-app
+          name: deploy
+          path: deploy
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
@@ -66,5 +65,4 @@ jobs:
         with:
           app-name: 'chatbok'
           slot-name: 'Production'
-          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C30A64F26A834AF59B992DA917216524 }}
