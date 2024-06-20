@@ -56,6 +56,10 @@ jobs:
           name: deploy
           path: deploy
 
+      - name: Unzip artifact
+        run: |
+          unzip deploy/deploy.zip -d deploy
+
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
