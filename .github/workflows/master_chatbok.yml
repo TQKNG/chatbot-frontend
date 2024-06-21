@@ -52,5 +52,5 @@ jobs:
         with:
           app-name: 'chatbok'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F1B5FC2B16E246639A56254BF0945F9E }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_03280C9195084DD9AB319500E127CD80 }}
           package: .
