@@ -9,6 +9,7 @@ import QuestionCard from "./components/QuestionCard";
 interface Conversation {
   role: string;
   content: string;
+  img_url?:string;
 }
 
 type OptionType = "Historical Analysis" | "Predictive Analysis" | "Descriptive Analysis" | "Diagnostic Analysis" | "Prescriptive Analysis" | "Other";
@@ -85,7 +86,7 @@ export default function Home() {
         prev.map((item, index) => {
           if (item.role === "assistant" && index === prev.length - 1) {
             if(data?.data?.data?.output === undefined){
-              return{...item, content:data?.data?.data}
+              return{...item, content:data?.data?.data, img_url:data?.data?.plot_url}
             }
             return { ...item, content: data.data.data.output };
           }

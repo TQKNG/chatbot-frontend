@@ -21,8 +21,17 @@ const Chat = ({key,item}) => {
           {item.content === "" ? (
             <span className="loading loading-dots loading-sm"></span>
           ) : (
-            <div className="flex w-100 align-center justify-start">
+            <div className="flex flex-col w-100 align-center justify-start">
+              <div>
               {item?.content}
+              </div>
+              {item?.img_url && (
+                <img
+                  alt="Bot-chat bubble"
+                  src={item.img_url}
+                  className="chat-image"
+                />
+              )}
             </div>
           )}
         </div>
