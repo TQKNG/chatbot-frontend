@@ -66,6 +66,7 @@ export default function Home() {
 
       // Response from AI Assistant service (API)
       console.log("test question front", value);
+      
       const response = await fetch("/api/aichatbot", {
         method: "POST",
         headers: {
@@ -78,14 +79,15 @@ export default function Home() {
       });
 
       const data = await response.json();
-      console.log("tesssssss", data?.data?.data);
 
       // Add response to conversation
       setConversation((prev) =>
         prev.map((item, index) => {
           if (item.role === "assistant" && index === prev.length - 1) {
-            // return { ...item, content: data.data.data.output };
-            return{...item, content:data?.data?.data}
+            if(data?.data?.data?.output === undefined){
+              return{...item, content:data?.data?.data}
+            }
+            return { ...item, content: data.data.data.output };
           }
           return item;
         })
@@ -207,7 +209,7 @@ export default function Home() {
           )}
 
           {/* Section: Chat */}
-          <div className="w-full flex flex-col items-center justify-center">
+          <div className="w-full flex flex-col items-center justify-center text-white">
             {/* User input */}
             <div className="relative flex justify-center items-center w-full max-w-4xl">
               <input

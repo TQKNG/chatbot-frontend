@@ -25,7 +25,7 @@ const CollapseMenu = () => {
         </div>
 
         {/* Collapse Content */}
-        <div className="collapse-content text-sm flex flex-col  justify-start gap-4">
+        <div className="collapse-content text-sm flex flex-col  justify-start gap-4 text-white">
           {["Health", "Finance", "Education", "Stock"].map((item, index) => {
             return (
               <React.Fragment key={index}>
@@ -52,7 +52,7 @@ const CollapseMenu = () => {
                   {/* Connect Status */}
                   <div className="form-control">
                     <label className="cursor-pointer label gap-2">
-                      <span className="label-text">Connect</span>
+                      <span className="label-text text-white">Connect</span>
                       <input
                         type="checkbox"
                         className="toggle toggle-accent toggle-sm"
