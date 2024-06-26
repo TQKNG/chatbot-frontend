@@ -78,13 +78,14 @@ export default function Home() {
       });
 
       const data = await response.json();
-      console.log("tesssssss", data);
+      console.log("tesssssss", data?.data?.data);
 
       // Add response to conversation
       setConversation((prev) =>
         prev.map((item, index) => {
           if (item.role === "assistant" && index === prev.length - 1) {
-            return { ...item, content: data.data.data.output };
+            // return { ...item, content: data.data.data.output };
+            return{...item, content:data?.data?.data}
           }
           return item;
         })
@@ -117,13 +118,12 @@ export default function Home() {
     });
 
     const data = await response.json();
-    console.log("tesssssss", data);
+    console.log("tesssssss", data.data.data);
 
-    // Add response to conversation
     setConversation((prev) =>
       prev.map((item, index) => {
         if (item.role === "assistant" && index === prev.length - 1) {
-          return { ...item, content: data.data.data.output };
+          return { ...item, content: data.data.data?.output };
         }
         return item;
       })

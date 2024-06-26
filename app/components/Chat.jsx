@@ -41,7 +41,6 @@ const Chat = ({key,item}) => {
         <div className="chat-bubble bg-aquaTurquoise text-black max-w-[400px]">
           <strong className="badge ">User</strong>
           <br />
-
           <div>{item?.content}</div>
         </div>
       </div>
