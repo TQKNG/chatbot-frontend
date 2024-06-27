@@ -46,7 +46,10 @@ jobs:
         with:
           name: app
 
-      - name: List downloaded artifact directory contents
+      - name: Unpack downloaded artifact
+        run: unzip -q app.zip -d app
+
+      - name: List unpacked artifact contents
         run: ls -alh app
 
       - name: 'Deploy to Azure Web App'
