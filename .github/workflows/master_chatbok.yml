@@ -30,7 +30,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app
-          path: ./build/standalone
+          path: ./build/
+          if-no-files-found: warn
 
   deploy:
     runs-on: ubuntu-latest
@@ -44,6 +45,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app
+
+      - name: List downloaded artifact directory contents
+        run: ls -alh app
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
