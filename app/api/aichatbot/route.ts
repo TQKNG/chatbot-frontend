@@ -26,6 +26,9 @@ export async function POST(req:Request){
         })
     }
     else if(body.question.toLowerCase().includes("why cto")){
+        // wait for 4 seconds before returning the response
+        await new Promise(resolve => setTimeout(resolve, 4000));
+
         return Response.json({data:{data:{output:"The CTO has the highest temperature in the April 2024 because the heat system was on for the first 15 days of the month"}}})
     }
     else{

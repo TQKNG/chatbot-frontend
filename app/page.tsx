@@ -27,15 +27,15 @@ const sampleQuestions: SampleQuestion[] = [
   },
   {
     type: ["Descriptive Analysis"],
-    question: "which room in GlobalDWS have the highest temperature in April 2024?"
+    question: "Which room in GlobalDWS have the highest temperature in April 2024?"
+  },
+  {
+    type: ["Diagnostic Analysis"],
+    question: "Why CTO Room - Stationary has the highest temperature in the April 2024?"
   },
   {
     type: ["Predictive Analysis"],
     question: "Give me 15 days temperature forecast analysis based on historical data."
-  },
-  {
-    type: ["Diagnostic Analysis"],
-    question: "Why CTO has the highest temperature in the April 2024?"
   },
 ];
 
@@ -120,13 +120,13 @@ export default function Home() {
       }),
     });
 
-    const data = await response.json();
+    const data = await response?.json();
     // console.log("tesssssss", data.data.data);
 
     setConversation((prev) =>
       prev.map((item, index) => {
         if (item.role === "assistant" && index === prev.length - 1) {
-          return { ...item, content: data?.data?.data?.output };
+          return { ...item, content: data.data.data?.output };
         }
         return item;
       })
@@ -137,11 +137,7 @@ export default function Home() {
   const handleQuickQuestion = async(question:string)=>{
     console.log("Test quick question", question)
     setValue(question);
-
-    if(value === "") return;
-    else{
-      await handleSend();
-    }
+    
   }
 
   // Handle reset conversation
@@ -199,7 +195,6 @@ export default function Home() {
                 height={250}
                 priority
               />
-
               <div className="flex p-10 gap-5 ">
               {sampleQuestions.map((item,index)=>{
                 return(
