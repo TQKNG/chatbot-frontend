@@ -1,10 +1,11 @@
 import React from "react";
 
-const QuestionCard = ({ key, item }) => {
+const QuestionCard = ({ key, item, handleQuickQuestion }) => {
   return (
     <React.Fragment key={key}>
       <div
         className={`card w-30 max-w-50 cursor-pointer text-white bg-secondary border-transparent hover:bg-slate-50 hover:text-black rounded-lg`}
+        onClick={() => handleQuickQuestion(item.question)}
       >
         <div className="card-body items-center text-center">
           <div className="flex flex-col gap-2 items-center">

@@ -10,13 +10,14 @@ const Chat = ({key,item}) => {
           <div className="w-10 rounded-full">
             <img
               alt="Bot-chat bubble"
-              src="/logo-v3.png"
+              src="/Logo-Virbrix.png"
             />
           </div>
         </div>
         <div className="flex flex-col chat-bubble max-w-[400px]">
           <strong className="badge bg-aquaTurquoise text-black">
-            ChatBOK
+            {/* ChatBOK */}
+            Virbrix
           </strong>
           {item.content === "" ? (
             <span className="loading loading-dots loading-sm"></span>
@@ -43,7 +44,7 @@ const Chat = ({key,item}) => {
           <div className="w-10 rounded-full">
             <img
               alt="user-chat bubble"
-              src="/logo-user.png"
+              src="/logo-user-2.png"
             />
           </div>
         </div>
