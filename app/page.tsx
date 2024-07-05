@@ -9,33 +9,41 @@ import QuestionCard from "./components/QuestionCard";
 interface Conversation {
   role: string;
   content: string;
-  img_url?:string;
+  img_url?: string;
 }
 
-type OptionType = "Historical Analysis" | "Predictive Analysis" | "Descriptive Analysis" | "Diagnostic Analysis" | "Prescriptive Analysis" | "Other";
+type OptionType =
+  | "Historical Analysis"
+  | "Predictive Analysis"
+  | "Descriptive Analysis"
+  | "Diagnostic Analysis"
+  | "Prescriptive Analysis"
+  | "Other";
 
-
-interface SampleQuestion{
+interface SampleQuestion {
   type: OptionType[];
-  question:string;
+  question: string;
 }
 
 const sampleQuestions: SampleQuestion[] = [
   {
     type: ["Historical Analysis"],
-    question: "What was average temperature in March 2023?"
+    question: "What was average temperature in March 2023?",
   },
   {
     type: ["Descriptive Analysis"],
-    question: "Which room in GlobalDWS have the highest temperature in April 2024?"
+    question:
+      "Which room in GlobalDWS have the highest temperature in April 2024?",
   },
   {
     type: ["Diagnostic Analysis"],
-    question: "Why CTO Room - Stationary has the highest temperature in the April 2024?"
+    question:
+      "Why CTO Room - Stationary has the highest temperature in the April 2024?",
   },
   {
     type: ["Predictive Analysis"],
-    question: "Give me 15 days temperature forecast analysis based on historical data."
+    question:
+      "Give me 15 days temperature forecast analysis based on historical data.",
   },
 ];
 
@@ -67,7 +75,7 @@ export default function Home() {
 
       // Response from AI Assistant service (API)
       console.log("test question front", value);
-      
+
       const response = await fetch("/api/aichatbot", {
         method: "POST",
         headers: {
@@ -85,8 +93,12 @@ export default function Home() {
       setConversation((prev) =>
         prev.map((item, index) => {
           if (item.role === "assistant" && index === prev.length - 1) {
-            if(data?.data?.data?.output === undefined){
-              return{...item, content:data?.data?.data, img_url:data?.data?.plot_url}
+            if (data?.data?.data?.output === undefined) {
+              return {
+                ...item,
+                content: data?.data?.data,
+                img_url: data?.data?.plot_url,
+              };
             }
             return { ...item, content: data.data.data.output };
           }
@@ -134,11 +146,10 @@ export default function Home() {
   };
 
   // Handle quick question access
-  const handleQuickQuestion = async(question:string)=>{
-    console.log("Test quick question", question)
+  const handleQuickQuestion = async (question: string) => {
+    console.log("Test quick question", question);
     setValue(question);
-    
-  }
+  };
 
   // Handle reset conversation
   const handleRefresh = () => {
@@ -154,7 +165,8 @@ export default function Home() {
         {/* Left-side panel*/}
         <div className="col-span-3 bg-secondary p-10 rounded-md">
           {/*New Chat */}
-          <div className="flex items-center justify-start gap-4 w-full cursor-pointer hover:text-aquaTurquoise text-white"
+          <div
+            className="flex items-center justify-start gap-4 w-full cursor-pointer hover:text-aquaTurquoise text-white"
             onClick={handleRefresh}
           >
             {/* Edit icon */}
@@ -177,7 +189,7 @@ export default function Home() {
           </div>
           {/* Section: Database Connection */}
           <div>
-            <CollapseMenu/>
+            <CollapseMenu />
           </div>
         </div>
 
@@ -187,30 +199,30 @@ export default function Home() {
           {conversation && conversation.length === 0 ? (
             // If no conversation, display logo hero and guiding question cards
             <div className="w-full flex flex-col justify-center items-center my-0 gap-3">
-              <Image
+              <img
                 className="relative"
                 src="/logo-AI-v4.png"
                 alt="My Chatbot"
                 width={250}
                 height={250}
-                priority
               />
+
               <div className="flex p-10 gap-5 ">
-              {sampleQuestions.map((item,index)=>{
-                return(
-                  <QuestionCard key={index} item={item} handleQuickQuestion={handleQuickQuestion} />
-                )
-              })}
+                {sampleQuestions.map((item, index) => {
+                  return (
+                    <QuestionCard
+                      key={index}
+                      item={item}
+                      handleQuickQuestion={handleQuickQuestion}
+                    />
+                  );
+                })}
               </div>
-            
-           
             </div>
           ) : (
             <div className="textarea d-flex w-full max-w-4xl bg-inherit max-h-[700px] overflow-auto mb-2">
               {conversation.map((item, index) => {
-                return (
-                  <Chat key={index} item={item} />
-                );
+                return <Chat key={index} item={item} />;
               })}
             </div>
           )}
