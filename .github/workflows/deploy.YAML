@@ -28,3 +28,28 @@ jobs:
             client-id: ${{ secrets.AZURE_CLIENT_ID }}
             tenant-id: ${{ secrets.AZURE_TENANT_ID }}
             subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build Next.js app
+        run: |
+          npm run build
+          mv .next/static .next/standalone/.next/static
+          # mv public .next/standalone/public
+
+      - name: Deploy
+        shell: pwsh
+        run: |
+            $ZIP_FILE_NAME = "./${FILE_NAME}.zip"
+            zip $ZIP_FILE_NAME ./* .next -qr
+
+            az webapp deploy `
+                --resource-group $RESOURCE_GROUP_NAME `
+                --name $WEB_APP_NAME `
+                --src-path $ZIP_FILE_NAME `
+                --slot staging `
+                --type zip `
+                --clean true 
+
+        env:
+            FILE_NAME: "release"
+            RESOURCE_GROUP_NAME: "appsvc_linux_centralus"
+            WEB_APP_NAME: "chatbok"
