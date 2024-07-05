@@ -26,13 +26,6 @@ jobs:
         run: |
           npm install
 
-      - name: Print Secrets
-        run: |
-          echo "Azure Client ID: ${{ secrets.AZURE_CLIENT_ID }}"
-          echo "Azure Tenant ID: ${{ secrets.AZURE_TENANT_ID }}"
-          echo "Azure Subscription ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          echo "Azure Client Secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-
       - name: 'Login to Azure Subscription' # This is required for OIDC authentication to Azure
         uses: azure/login@v1
         with:
