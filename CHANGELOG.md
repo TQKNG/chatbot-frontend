@@ -7,13 +7,9 @@
 - Feature 2
 
 ### Changed
-- Update 1
-- Update 2
+- Test YAML deployment to Azure
 
 ### Fixed
-- Bug 1
-- Bug 2
-
 
 ## [1.0.0] - 2024-06-05
 
@@ -25,3 +21,9 @@
 ### Added
 - Change UI design
 - Update YAML file
+
+## [1.0.2] - 2024-07-05
+
+### Added
+- Change UI design
+- Connection to production site
