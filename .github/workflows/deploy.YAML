@@ -2,7 +2,8 @@ name: Deploy Nextjs 14 to Azure
 
 on:
   push:
-    branches: main
+    branches:
+      - main
 
   workflow_dispatch:
 
