@@ -201,7 +201,7 @@ export default function Home() {
             <div className="w-full flex flex-col justify-center items-center my-0 gap-3">
               <img
                 className="relative"
-                src="/logo-AI-v4.png"
+                src="/Logo-AI-v4.png"
                 alt="My Chatbot"
                 width={250}
                 height={250}
