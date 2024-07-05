@@ -46,7 +46,7 @@ const sampleQuestions: SampleQuestion[] = [
       "Give me 15 days temperature forecast analysis based on historical data.",
   },
 ];
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 export default function Home() {
   // States
