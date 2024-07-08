@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  APPLICATION_PUBLISH_PROFILE: ${{ secrets.APP_PUBLISH_PROFILE }}
+  APPLICATION_PUBLISH_PROFILE: ${{ secrets.APPLICATION_PUBLISH_PROFILE }}
   WEBAPP_NAME: "chatbok"
 
 jobs:
