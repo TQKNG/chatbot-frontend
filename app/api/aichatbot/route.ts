@@ -15,7 +15,7 @@ export async function POST(req:Request){
 
     */
     if(body.question.toLowerCase().includes("analysis")){
-       res = await fetch("http://127.0.0.1:8000/api/v1/askdataanalysisagent", {
+       res = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/askdataanalysisagent", {
             method:"POST",
             headers:{
                 "Content-Type":"application/json"
@@ -32,7 +32,7 @@ export async function POST(req:Request){
         return Response.json({data:{data:{output:"The CTO has the highest temperature in the April 2024 because the heat system was on for the first 15 days of the month"}}})
     }
     else{
-        res = await fetch("http://127.0.0.1:8000/api/v1/asksqlagent", {
+        res = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/asksqlagent", {
             method:"POST",
             headers:{
                 "Content-Type":"application/json"
