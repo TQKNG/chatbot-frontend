@@ -1,59 +1,39 @@
-name: Deploy Nextjs 14 to Azure
+name: Build and deploy Next.js app to Azure Web App
 
 on:
   push:
-    branches: ["main"]
-
+    branches:
+      - main
   workflow_dispatch:
 
-permissions:
-  id-token: write # This is required for requesting the JWT
-  contents: read # This is required for actions/checkout
+env:
+  APPLICATION_PUBLISH_PROFILE: ${{ secrets.APP_PUBLISH_PROFILE }}
+  WEBAPP_NAME: "chatbok"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: Set up Node.js version
+        uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "18.x"
 
-      - name: Install dependencies
+      - name: npm install, build, and test
         run: |
           npm install
-
-      - name: 'Login to Azure Subscription' # This is required for OIDC authentication to Azure
-        uses: azure/login@v1
-        with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
-            allow-no-subscriptions: true
-          
-
-      - name: Build Next.js app
-        run: |
           npm run build
-          mv .next/static .next/standalone/.next/static
-          # mv public .next/standalone/public
+          mv ./build/static ./build/standalone/build
+          mv ./public ./build/standalone
 
-      - name: Deploy
-        shell: pwsh
-        run: |
-            $ZIP_FILE_NAME = "./${FILE_NAME}.zip"
-            zip $ZIP_FILE_NAME ./* .next -qr
-
-            az webapp deploy `
-                --resource-group $RESOURCE_GROUP_NAME `
-                --name $WEB_APP_NAME `
-                --src-path $ZIP_FILE_NAME `
-                --slot staging `
-                --type zip `
-                --clean true 
-
-        env:
-            FILE_NAME: "release"
-            RESOURCE_GROUP_NAME: "appsvc_linux_centralus"
-            WEB_APP_NAME: "chatbok"
+      - name: "Deploy to Azure Web App"
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.WEBAPP_NAME }}
+          slot-name: "Production"
+          publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
+          package: ./build/standalone
