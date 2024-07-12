@@ -120,30 +120,42 @@ export default function Home() {
     setValue("");
     setConversation([...chatHistory]);
 
-    // Response from AI Assistant service (API)
-    console.log("test question front", value);
-    const response = await fetch("/api/aichatbot", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        // question: chatHistory,
-        question: value,
-      }),
-    });
 
-    const data = await response?.json();
+    const eventSource = new EventSource("/api/aichatbot");
+
+    eventSource.onmessage = (event) => {
+      console.log("test event", event);
+    };
+
+    eventSource.onerror = (error) => {
+      console.error("EventSource error:", error);
+      eventSource.close();
+  };
+
+    // // Response from AI Assistant service (API)
+    // console.log("test question front", value);
+    // const response = await fetch("/api/aichatbot", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     // question: chatHistory,
+    //     question: value,
+    //   }),
+    // });
+
+    // const data = await response?.json();
     // console.log("tesssssss", data.data.data);
 
-    setConversation((prev) =>
-      prev.map((item, index) => {
-        if (item.role === "assistant" && index === prev.length - 1) {
-          return { ...item, content: data.data.data?.output };
-        }
-        return item;
-      })
-    );
+    // setConversation((prev) =>
+    //   prev.map((item, index) => {
+    //     if (item.role === "assistant" && index === prev.length - 1) {
+    //       return { ...item, content: data.data.data?.output };
+    //     }
+    //     return item;
+    //   })
+    // );
   };
 
   // Handle quick question access

@@ -1,7 +1,8 @@
+import { NextResponse } from "next/server";
 export const dynamic= 'force-dynamic'
-export async function POST(req:Request){
+export async function POST(req:Request, res:Response){
     const body  = await req.json();
-    let res = null;
+    let response = null;
 
     console.log("test question", body)
 
@@ -14,8 +15,10 @@ export async function POST(req:Request){
     http://127.0.0.1:8000/api/v1/asksqlagent
 
     */
-    if(body.question.toLowerCase().includes("analysis")){
-       res = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/askdataanalysisagent", {
+
+     // Set headers for Server-Sent Events
+   
+    response = await fetch("http://127.0.0.1:8000/api/v1/asksqlagent", {
             method:"POST",
             headers:{
                 "Content-Type":"application/json"
@@ -23,29 +26,24 @@ export async function POST(req:Request){
             body:JSON.stringify({
                 question:body.question
             })
-        })
-    }
-    else if(body.question.toLowerCase().includes("why cto")){
-        // wait for 4 seconds before returning the response
-        await new Promise(resolve => setTimeout(resolve, 4000));
-
-        return Response.json({data:{data:{output:"The CTO has the highest temperature in the April 2024 because the heat system was on for the first 15 days of the month"}}})
-    }
-    else{
-        res = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/asksqlagent", {
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                question:body.question
-            })
-        })
-    }
+    })
     
-    const data = await res?.json()
-    console.log("test response", data)
+    // const data = await res?.json()
+    // console.log("test response", data)
 
+
+    response.body?.pipeTo(new WritableStream({
+        write(chunk){
+            console.log(chunk)
+            Response.json({data:chunk})
+
+        },
+        close(){
+            console.log("Stream closed")
+        },
+        abort(){
+            console.log("Stream aborted")
+        }
+    }))
     
-    return Response.json({data});
 }
