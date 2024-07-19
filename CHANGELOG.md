@@ -27,3 +27,9 @@
 ### Added
 - Change UI design
 - Connection to production site
+
+## [1.0.3] - 2024-07-19
+
+### Added
+- Update model build
+
