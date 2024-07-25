@@ -99,6 +99,8 @@ export default function Home() {
         const { done, value } = await reader?.read() as { done: boolean, value: Uint8Array };// ts type assertion
         if (done) break;
         result += decoder.decode(value, { stream: true });
+
+        
         setConversation((prev) =>
           prev.map((item, index) => {
             if (item.role === "assistant" && index === prev.length - 1) {

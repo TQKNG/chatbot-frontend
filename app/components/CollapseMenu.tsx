@@ -56,7 +56,7 @@ const CollapseMenu = () => {
                       <input
                         type="checkbox"
                         className="toggle toggle-accent toggle-sm"
-                        checked ={index === 0 ? true : false}
+                        // checked ={index === 0 ? true : false}
                       />
                     </label>
                   </div>
