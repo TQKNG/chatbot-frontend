@@ -33,3 +33,8 @@
 ### Added
 - Update model build
 
+## [1.0.4] - 2024-07-30
+
+### Added
+- Add stream response functionality
+
