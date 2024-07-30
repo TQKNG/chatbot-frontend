@@ -4,6 +4,10 @@ import React, { useRef } from "react";
 import CollapseMenu from "./components/CollapseMenu";
 import Chat from "./components/Chat";
 import QuestionCard from "./components/QuestionCard";
+import { useCallStateHooks } from "@stream-io/video-react-sdk";
+import { RealtimeTranscriber } from "assemblyai";
+import { createTranscriber } from "./helpers/createTranscriber";
+import { createMicrophone } from "./helpers/createMicrophone";
 
 // Types
 interface Conversation {
@@ -51,8 +55,42 @@ export const maxDuration = 60;
 export default function Home() {
   // States
   const [value, setValue] = React.useState<string>("");
+  const [mode, setMode] = React.useState<number>(0);
   const [conversation, setConversation] = React.useState<Conversation[]>([]);
   const inputRef = useRef<HTMLInputElement>(null); // use this to reset the conversation instead of refreshing the page
+
+  const [robotActive, setRobotActive] = React.useState<boolean>(false);
+  const [transcriber, setTranscriber] = React.useState<
+    RealtimeTranscriber | undefined
+  >(undefined);
+  const { useCallCallingState, useParticipantCount, useMicrophoneState } =
+    useCallStateHooks();
+  const { mediaStream } = useMicrophoneState();
+  const [transcribedText, setTranscribedText] = React.useState<string>("");
+  const [mic, setMic] = React.useState<
+    | {
+        startRecording(onAudioCallback: any): Promise<void>;
+        stopRecording(): void;
+      }
+    | undefined
+  >(undefined);
+
+  // const initializeAssemblyAI = React.useCallback(async () => {
+  //   const transcriber = await createTranscriber(setTranscribedText);
+  //   await transcriber?.connect();
+  //   if (mediaStream) {
+  //     const mic = createMicrophone(mediaStream);
+
+  //     if(mic){
+  //       mic.startRecording((audioData: any) => {
+  //         transcriber?.sendAudio(audioData);
+  //       });
+  //       setMic(mic);
+  //       setTranscriber(transcriber);
+  //     }
+ 
+  //   }
+  // }, [mediaStream]);
 
   // Handlers
   const handleInputChange = React.useCallback(
@@ -74,7 +112,6 @@ export default function Home() {
       setValue("");
       setConversation([...chatHistory]);
 
-      
       console.log("test question front", value);
 
       const response = await fetch("/api/aichatbot", {
@@ -96,11 +133,13 @@ export default function Home() {
       const decoder = new TextDecoder("utf-8");
       let result = "";
       while (true) {
-        const { done, value } = await reader?.read() as { done: boolean, value: Uint8Array };// ts type assertion
+        const { done, value } = (await reader?.read()) as {
+          done: boolean;
+          value: Uint8Array;
+        }; // ts type assertion
         if (done) break;
         result += decoder.decode(value, { stream: true });
 
-        
         setConversation((prev) =>
           prev.map((item, index) => {
             if (item.role === "assistant" && index === prev.length - 1) {
@@ -143,7 +182,7 @@ export default function Home() {
     setValue("");
     setConversation([...chatHistory]);
 
-    // 
+    //
     const eventSource = new EventSource("/api/aichatbot");
 
     eventSource.onmessage = (event) => {
@@ -229,65 +268,76 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Main Chat */}
-        <div className="flex flex-col justify-between items-center col-span-9">
-          {/* Section: Welcome Hero */}
-          {conversation && conversation.length === 0 ? (
-            // If no conversation, display logo hero and guiding question cards
-            <div className="w-full flex flex-col justify-center items-center my-0 gap-3">
-              <img
-                className="relative"
-                src="/Logo-AI-v4.png"
-                alt="My Chatbot"
-                width={250}
-                height={250}
-              />
+        {/* Mode Selector */}
+        {mode === 0 ? (
+          <>
+            {/* Main Chat */}
+            <div className="flex flex-col justify-between items-center col-span-9">
+              {/* Section: Welcome Hero */}
+              {conversation && conversation.length === 0 ? (
+                // If no conversation, display logo hero and guiding question cards
+                <div className="w-full flex flex-col justify-center items-center my-0 gap-3">
+                  <img
+                    className="relative"
+                    src="/Logo-AI-v4.png"
+                    alt="My Chatbot"
+                    width={250}
+                    height={250}
+                  />
 
-              <div className="flex p-10 gap-5 ">
-                {sampleQuestions.map((item, index) => {
-                  return (
-                    <QuestionCard
-                      key={index}
-                      item={item}
-                      handleQuickQuestion={handleQuickQuestion}
-                    />
-                  );
-                })}
+                  <div className="flex p-10 gap-5 ">
+                    {sampleQuestions.map((item, index) => {
+                      return (
+                        <QuestionCard
+                          key={index}
+                          item={item}
+                          handleQuickQuestion={handleQuickQuestion}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="textarea d-flex w-full max-w-4xl bg-inherit max-h-[700px] overflow-auto mb-2">
+                  {conversation.map((item, index) => {
+                    return <Chat key={index} item={item} />;
+                  })}
+                </div>
+              )}
+
+              {/* Section: Chat */}
+              <div className="w-full flex flex-col items-center justify-center text-white">
+                {/* User input */}
+                <div className="relative flex justify-center items-center w-full max-w-4xl">
+                  <input
+                    placeholder="Ask me anything about your database"
+                    className="w-full max-w-4xl input border-md bg-secondary"
+                    value={value}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                  />
+
+                  {/* Send Button */}
+                  <Image
+                    className="absolute cursor-pointer right-0 hover:opacity-80"
+                    src="/icon-send.png"
+                    alt="btn-send"
+                    width={50}
+                    height={50}
+                    priority
+                    onClick={handleSend}
+                  />
+                </div>
               </div>
             </div>
-          ) : (
-            <div className="textarea d-flex w-full max-w-4xl bg-inherit max-h-[700px] overflow-auto mb-2">
-              {conversation.map((item, index) => {
-                return <Chat key={index} item={item} />;
-              })}
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col justify-between items-center col-span-9">
+              <div>Voice Assistant Mode</div>
             </div>
-          )}
-
-          {/* Section: Chat */}
-          <div className="w-full flex flex-col items-center justify-center text-white">
-            {/* User input */}
-            <div className="relative flex justify-center items-center w-full max-w-4xl">
-              <input
-                placeholder="Ask me anything about your database"
-                className="w-full max-w-4xl input border-md bg-secondary"
-                value={value}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-              />
-
-              {/* Send Button */}
-              <Image
-                className="absolute cursor-pointer right-0 hover:opacity-80"
-                src="/icon-send.png"
-                alt="btn-send"
-                width={50}
-                height={50}
-                priority
-                onClick={handleSend}
-              />
-            </div>
-          </div>
-        </div>
+          </>
+        )}
 
         {/* Right-side panel */}
         {/* <div className="col-span-3"></div> */}
