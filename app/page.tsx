@@ -4,10 +4,6 @@ import React, { useRef } from "react";
 import CollapseMenu from "./components/CollapseMenu";
 import Chat from "./components/Chat";
 import QuestionCard from "./components/QuestionCard";
-import { useCallStateHooks } from "@stream-io/video-react-sdk";
-import { RealtimeTranscriber } from "assemblyai";
-import { createTranscriber } from "./helpers/createTranscriber";
-import { createMicrophone } from "./helpers/createMicrophone";
 
 // Types
 interface Conversation {
@@ -55,42 +51,9 @@ export const maxDuration = 60;
 export default function Home() {
   // States
   const [value, setValue] = React.useState<string>("");
-  const [mode, setMode] = React.useState<number>(0);
+  const [mode, setMode] = React.useState<number>(1);
   const [conversation, setConversation] = React.useState<Conversation[]>([]);
   const inputRef = useRef<HTMLInputElement>(null); // use this to reset the conversation instead of refreshing the page
-
-  const [robotActive, setRobotActive] = React.useState<boolean>(false);
-  const [transcriber, setTranscriber] = React.useState<
-    RealtimeTranscriber | undefined
-  >(undefined);
-  const { useCallCallingState, useParticipantCount, useMicrophoneState } =
-    useCallStateHooks();
-  const { mediaStream } = useMicrophoneState();
-  const [transcribedText, setTranscribedText] = React.useState<string>("");
-  const [mic, setMic] = React.useState<
-    | {
-        startRecording(onAudioCallback: any): Promise<void>;
-        stopRecording(): void;
-      }
-    | undefined
-  >(undefined);
-
-  // const initializeAssemblyAI = React.useCallback(async () => {
-  //   const transcriber = await createTranscriber(setTranscribedText);
-  //   await transcriber?.connect();
-  //   if (mediaStream) {
-  //     const mic = createMicrophone(mediaStream);
-
-  //     if(mic){
-  //       mic.startRecording((audioData: any) => {
-  //         transcriber?.sendAudio(audioData);
-  //       });
-  //       setMic(mic);
-  //       setTranscriber(transcriber);
-  //     }
- 
-  //   }
-  // }, [mediaStream]);
 
   // Handlers
   const handleInputChange = React.useCallback(
@@ -333,8 +296,10 @@ export default function Home() {
           </>
         ) : (
           <>
-            <div className="flex flex-col justify-between items-center col-span-9">
-              <div>Voice Assistant Mode</div>
+            <div className="flex flex-col items-center col-span-9">
+              {/* <MicrophoneStream/>
+               */}
+
             </div>
           </>
         )}

@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@stream-io/video-react-sdk": "^1.2.18",
     "assemblyai": "^4.6.1",
     "daisyui": "^4.12.2",
     "next": "14.2.3",
