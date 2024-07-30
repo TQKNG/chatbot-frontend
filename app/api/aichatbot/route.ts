@@ -35,7 +35,7 @@ export async function POST(req: Request, res: Response) {
   // Read the response body once
   const responseText = await response.text();
 
-  // test readable stream
+  //  readable stream
   const stream = new ReadableStream({
     async start(controller) {
       const encoder = new TextEncoder();
@@ -46,7 +46,7 @@ export async function POST(req: Request, res: Response) {
           controller.enqueue(encoder.encode(responseText[index]));
           index++;
           // Schedule the next character to be enqueued
-          setTimeout(enqueueNextCharacter, 50); // Adjust the delay as needed
+          setTimeout(enqueueNextCharacter, 20); // Adjust the delay as needed
         } else {
           // Close the stream when all characters have been enqueued
           controller.close();
@@ -65,23 +65,4 @@ export async function POST(req: Request, res: Response) {
       Connection: "keep-alive",
     },
   });
-
-  // const stream = response.body?.pipeTo(new WritableStream({
-  //     write(chunk){
-  //         const reader = new TextDecoder('utf-8')
-  //         const data = reader.decode(chunk)
-  //         let results;
-  //         if (data.includes("sql-db-query-checker")) {
-  //             results = 'initialize'
-  //         }
-  //         else results = data
-
-  //     },
-  //     close(){
-  //         console.log("Stream closed")
-  //     },
-  //     abort(){
-  //         console.log("Stream aborted")
-  //     }
-  // }))
 }

@@ -74,7 +74,7 @@ export default function Home() {
       setValue("");
       setConversation([...chatHistory]);
 
-      // Response from AI Assistant service (API)
+      
       console.log("test question front", value);
 
       const response = await fetch("/api/aichatbot", {
@@ -143,6 +143,7 @@ export default function Home() {
     setValue("");
     setConversation([...chatHistory]);
 
+    // 
     const eventSource = new EventSource("/api/aichatbot");
 
     eventSource.onmessage = (event) => {
