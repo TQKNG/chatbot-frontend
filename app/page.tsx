@@ -4,6 +4,8 @@ import React, { useRef } from "react";
 import CollapseMenu from "./components/CollapseMenu";
 import Chat from "./components/Chat";
 import QuestionCard from "./components/QuestionCard";
+import AudioRecorder from "./helpers/AudioRecorder";
+import SpeechToText from "./helpers/AudioRecorder";
 
 // Types
 interface Conversation {
@@ -299,6 +301,7 @@ export default function Home() {
             <div className="flex flex-col items-center col-span-9">
               {/* <MicrophoneStream/>
                */}
+               <SpeechToText/>
 
             </div>
           </>
