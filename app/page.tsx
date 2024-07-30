@@ -74,7 +74,7 @@ export default function Home() {
       setValue("");
       setConversation([...chatHistory]);
 
-      // Response from AI Assistant service (API)
+      
       console.log("test question front", value);
 
       const response = await fetch("/api/aichatbot", {
@@ -88,24 +88,47 @@ export default function Home() {
         }),
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
 
-      // Add response to conversation
-      setConversation((prev) =>
-        prev.map((item, index) => {
-          if (item.role === "assistant" && index === prev.length - 1) {
-            if (data?.data?.data?.output === undefined) {
-              return {
-                ...item,
-                content: data?.data?.data,
-                img_url: data?.data?.plot_url,
-              };
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let result = "";
+      while (true) {
+        const { done, value } = await reader?.read() as { done: boolean, value: Uint8Array };// ts type assertion
+        if (done) break;
+        result += decoder.decode(value, { stream: true });
+
+        
+        setConversation((prev) =>
+          prev.map((item, index) => {
+            if (item.role === "assistant" && index === prev.length - 1) {
+              return { ...item, content: result };
             }
-            return { ...item, content: data.data.data.output };
-          }
-          return item;
-        })
-      );
+            return item;
+          })
+        );
+      }
+
+      // const data = await response.json();
+
+      // // Add response to conversation
+      // setConversation((prev) =>
+      //   prev.map((item, index) => {
+      //     if (item.role === "assistant" && index === prev.length - 1) {
+      //       if (data?.data?.data?.output === undefined) {
+      //         return {
+      //           ...item,
+      //           content: data?.data?.data,
+      //           img_url: data?.data?.plot_url,
+      //         };
+      //       }
+      //       return { ...item, content: data.data.data.output };
+      //     }
+      //     return item;
+      //   })
+      // );
     }
   };
 
@@ -120,30 +143,42 @@ export default function Home() {
     setValue("");
     setConversation([...chatHistory]);
 
-    // Response from AI Assistant service (API)
-    console.log("test question front", value);
-    const response = await fetch("/api/aichatbot", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        // question: chatHistory,
-        question: value,
-      }),
-    });
+    // 
+    const eventSource = new EventSource("/api/aichatbot");
 
-    const data = await response?.json();
+    eventSource.onmessage = (event) => {
+      console.log("test event", event);
+    };
+
+    eventSource.onerror = (error) => {
+      console.error("EventSource error:", error);
+      eventSource.close();
+    };
+
+    // // Response from AI Assistant service (API)
+    // console.log("test question front", value);
+    // const response = await fetch("/api/aichatbot", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     // question: chatHistory,
+    //     question: value,
+    //   }),
+    // });
+
+    // const data = await response?.json();
     // console.log("tesssssss", data.data.data);
 
-    setConversation((prev) =>
-      prev.map((item, index) => {
-        if (item.role === "assistant" && index === prev.length - 1) {
-          return { ...item, content: data.data.data?.output };
-        }
-        return item;
-      })
-    );
+    // setConversation((prev) =>
+    //   prev.map((item, index) => {
+    //     if (item.role === "assistant" && index === prev.length - 1) {
+    //       return { ...item, content: data.data.data?.output };
+    //     }
+    //     return item;
+    //   })
+    // );
   };
 
   // Handle quick question access
