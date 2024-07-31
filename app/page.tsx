@@ -4,8 +4,7 @@ import React, { useRef } from "react";
 import CollapseMenu from "./components/CollapseMenu";
 import Chat from "./components/Chat";
 import QuestionCard from "./components/QuestionCard";
-import AudioRecorder from "./helpers/AudioRecorder";
-import SpeechToText from "./helpers/AudioRecorder";
+import { AudioStreamPlayer } from "./components/AudioStreamPlayer";
 
 // Types
 interface Conversation {
@@ -198,6 +197,12 @@ export default function Home() {
     setConversation([]);
   };
 
+  // Handle start voice mode
+  // React.useEffect(() => {
+
+  // }, [mode]);
+  
+
   return (
     <main className="w-full flex max-h-screen flex-col items-center justify-between overflow-hidden p-10 bg-black">
       {/* Layout */}
@@ -299,9 +304,7 @@ export default function Home() {
         ) : (
           <>
             <div className="flex flex-col items-center col-span-9">
-              {/* <MicrophoneStream/>
-               */}
-               <SpeechToText/>
+              <AudioStreamPlayer text="Hello there how can I help you"/>
 
             </div>
           </>
