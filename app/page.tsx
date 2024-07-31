@@ -254,7 +254,7 @@ export default function Home() {
           }
 
           // Restart the process
-          startListening();
+          // startListening();
         };
 
         const checkSilence = () => {
