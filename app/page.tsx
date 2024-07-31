@@ -4,7 +4,7 @@ import React, { useRef } from "react";
 import CollapseMenu from "./components/CollapseMenu";
 import Chat from "./components/Chat";
 import QuestionCard from "./components/QuestionCard";
-import { AudioStreamPlayer } from "./components/AudioStreamPlayer";
+import { AudioStreamPlayer } from "./components/AudioStreamPlayer_socket";
 
 // Types
 interface Conversation {
@@ -52,10 +52,13 @@ export const maxDuration = 60;
 export default function Home() {
   // States
   const [value, setValue] = React.useState<string>("");
-  const [mode, setMode] = React.useState<number>(1);
+  const [mode, setMode] = React.useState<number>(0); //0: text mode, 1: voice mode
   const [conversation, setConversation] = React.useState<Conversation[]>([]);
   const audioRef = useRef<HTMLAudioElement>(null);
   const inputRef = useRef<HTMLInputElement>(null); // use this to reset the conversation instead of refreshing the page
+  const [isListening, setIsListening] = React.useState(false);
+  const [isStreaming, setIsStreaming] = React.useState(true);
+  const silenceThreshold = 5000;
 
   // Handlers
   const handleInputChange = React.useCallback(
@@ -198,18 +201,14 @@ export default function Home() {
     setConversation([]);
   };
 
-  // Handle start voice mode
+  // handle voice listening
   React.useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch("/api/voicebot", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+    const fetchAudioStream = async () => {
+      const response = await fetch("/api/voicebot");
 
       if (!response.ok) {
-        throw new Error(response.statusText);
+        console.error("Error fetching audio stream");
+        return;
       }
 
       const audioBlob = await response.blob();
@@ -217,14 +216,78 @@ export default function Home() {
 
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
-        audioRef.current.play();
+        audioRef.current
+          .play()
+          .catch((error) => console.error("Error playing audio:", error));
       }
     };
 
-    // fetchData();
+    const startListening = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        const mediaRecorder = new MediaRecorder(stream);
+        const audioChunks: Blob[] = [];
+        let lastChunkTime = Date.now();
+
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunks.push(event.data);
+          lastChunkTime = Date.now();
+        };
+
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: "audio/mpeg" });
+          const formData = new FormData();
+          formData.append("file", audioBlob);
+
+          try {
+            const response = await fetch("/api/voicebot", {
+              method: "POST",
+              body: formData,
+            });
+
+            const result = await response.json();
+            console.log("Transcription Result:", result);
+          } catch (error) {
+            console.error("Error transcribing audio:", error);
+          }
+
+          // Restart the process
+          startListening();
+        };
+
+        const checkSilence = () => {
+          if (Date.now() - lastChunkTime >= silenceThreshold) {
+            mediaRecorder.stop();
+            setIsListening(false);
+          } else {
+            setTimeout(checkSilence, 1000); // Check every second
+          }
+        };
+
+        mediaRecorder.start();
+        setIsListening(true);
+        checkSilence();
+      } catch (error) {
+        console.error("Error accessing microphone:", error);
+      }
+    };
+
+    if (mode) {
+      fetchAudioStream().then(() => {
+        setIsStreaming(false); // Stop streaming once the welcome message is done
+        setIsListening(true); // Start listening after the welcome message
+        startListening();
+      });
+    }
+    else{
+      setIsStreaming(false); // Stop streaming once the welcome message is done
+    }
 
     return () => {
-      console.log("test cleanup");
+      // Cleanup code if needed
+    
     };
   }, [mode]);
 
@@ -260,6 +323,29 @@ export default function Home() {
           {/* Section: Database Connection */}
           <div>
             <CollapseMenu />
+          </div>
+          {/* Chat mode toggle */}
+          <div className="flex items-center justify-start gap-4 w-full">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="white"
+            >
+              <path d="M240-520h60v-80h-60v80Zm100 80h60v-240h-60v240Zm110 80h60v-400h-60v400Zm110-80h60v-240h-60v240Zm100-80h60v-80h-60v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z" />
+            </svg>
+            <div className="form-control">
+              <label className="cursor-pointer label gap-2">
+                <span className="label-text text-white">Voice mode</span>
+                <input
+                  type="checkbox"
+                  className="toggle toggle-accent toggle-sm"
+                  checked={mode ? true : false}
+                  onChange={(e) => setMode(e.target.checked ? 1 : 0)}
+                />
+              </label>
+            </div>
           </div>
         </div>
 
@@ -328,16 +414,20 @@ export default function Home() {
           </>
         ) : (
           <>
-            <div className="flex flex-col items-center col-span-9">
+            <div className="flex flex-col items-center col-span-9 text-white">
               {/* <AudioStreamPlayer text="Hello there how can I help you"/> */}
-              <h1>Streaming Audio Example</h1>
+              <h1>Chat with Voice bot</h1>
               <audio ref={audioRef} autoPlay></audio>
+              {isStreaming && <p>Streaming audio...</p>}
+              {isListening && !isStreaming&& <p>Listening...</p>}
             </div>
           </>
         )}
 
         {/* Right-side panel */}
-        {/* <div className="col-span-3"></div> */}
+        {/* <div className="col-span-2">
+        
+        </div> */}
       </div>
     </main>
   );
