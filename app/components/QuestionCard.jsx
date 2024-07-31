@@ -1,14 +1,14 @@
 import React from "react";
 
-interface QuestionCardProps {
-  item:{
-    type: string;
-    question: string;
-  },
-  handleQuickQuestion:(question:string)=>void
-}
+// interface QuestionCardProps {
+//   item:{
+//     type: string;
+//     question: string;
+//   },
+//   handleQuickQuestion:(question:string)=>void
+// }
 
-const QuestionCard : React.FC<QuestionCardProps> = ({ item, handleQuickQuestion }) => {
+const QuestionCard  = ({ item, handleQuickQuestion }) => {
   return (
     <React.Fragment >
       <div

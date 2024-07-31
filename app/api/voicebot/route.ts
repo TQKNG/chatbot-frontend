@@ -1,15 +1,17 @@
+import { NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
+export async function GET() {
 
-export async function POST(request: Request) {
-  
+  const response = await fetch("http://127.0.0.1:8000/api/v1/test-voice",{
+    method:"GET",
+    headers:{
+      "Content-Type":"application/json"
+    }
+  })
 
+  const responseText = await response.text();
 
-  const body = await request.json();
-
-
-
-  const response = {
-    response: "Test AI response",
-  };
+  console.log("test response", responseText)
 
   return Response.json(response);
 }
