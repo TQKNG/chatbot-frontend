@@ -9,9 +9,35 @@ export async function GET() {
     }
   })
 
-  const responseText = await response.text();
+  const stream = new ReadableStream({
+    async start(controller){
+      const reader = response.body?.getReader();
 
-  console.log("test response", responseText)
+      if(!reader){
+        throw new Error("Failed to get reader from response body")
+      }
 
-  return Response.json(response);
+      const decoder = new TextDecoder();
+      let done = false;
+
+      while(!done){
+        const{value, done:readerDone} = await reader.read();
+        done  = readerDone;
+
+        if(value){
+          controller.enqueue(value);
+        }
+      }
+      controller.close();
+    }
+  })
+
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "audio/mpeg", // Use the appropriate MIME type for your audio
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+    }
+  });
 }

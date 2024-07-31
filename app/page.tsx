@@ -54,6 +54,7 @@ export default function Home() {
   const [value, setValue] = React.useState<string>("");
   const [mode, setMode] = React.useState<number>(1);
   const [conversation, setConversation] = React.useState<Conversation[]>([]);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const inputRef = useRef<HTMLInputElement>(null); // use this to reset the conversation instead of refreshing the page
 
   // Handlers
@@ -198,10 +199,34 @@ export default function Home() {
   };
 
   // Handle start voice mode
-  // React.useEffect(() => {
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch("/api/voicebot", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-  // }, [mode]);
-  
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      if (audioRef.current) {
+        audioRef.current.src = audioUrl;
+        audioRef.current.play();
+      }
+    };
+
+    // fetchData();
+
+    return () => {
+      console.log("test cleanup");
+    };
+  }, [mode]);
 
   return (
     <main className="w-full flex max-h-screen flex-col items-center justify-between overflow-hidden p-10 bg-black">
@@ -304,8 +329,9 @@ export default function Home() {
         ) : (
           <>
             <div className="flex flex-col items-center col-span-9">
-              <AudioStreamPlayer text="Hello there how can I help you"/>
-
+              {/* <AudioStreamPlayer text="Hello there how can I help you"/> */}
+              <h1>Streaming Audio Example</h1>
+              <audio ref={audioRef} autoPlay></audio>
             </div>
           </>
         )}
