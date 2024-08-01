@@ -238,20 +238,30 @@ export default function Home() {
 
         mediaRecorder.onstop = async () => {
           const audioBlob = new Blob(audioChunks, { type: "audio/mpeg" });
-          const formData = new FormData();
-          formData.append("file", audioBlob);
+          const reader = new FileReader();
 
-          try {
-            const response = await fetch("/api/voicebot", {
-              method: "POST",
-              body: formData,
-            });
-
-            const result = await response.json();
-            console.log("Transcription Result:", result);
-          } catch (error) {
-            console.error("Error transcribing audio:", error);
+          reader.onloadend = async ()=>{
+            const base64Audio = (reader.result as string)?.split(",")[1];
+            try {
+              const response = await fetch("/api/voicebot", {
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  audio: base64Audio,
+                  type:'audio/mpeg'
+                })
+              });
+  
+              const result = await response.json();
+              console.log("Transcription Result:", result);
+            } catch (error) {
+              console.error("Error transcribing audio:", error);
+            }
           }
+
+          reader.readAsDataURL(audioBlob);
 
           // Restart the process
           // startListening();

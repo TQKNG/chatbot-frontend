@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import fs from 'fs';
+import path from 'path';
 export const dynamic = "force-dynamic";
 
 
@@ -46,14 +48,15 @@ export async function GET() {
 }
 
 // Speech-to-text API
-export async function POST(req:Request, res:Response){
-  const body = req.body;
-
-  console.log("Request Body:", body);
+export async function POST(req: Request, res: Response){
+  const body = await req.json();
 
   const response = await fetch("http://127.0.0.1:8000/api/v1/test-voice",{
     method:"POST",
-    body: body
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body)
   })
 
   if (!response.ok) {
@@ -62,5 +65,4 @@ export async function POST(req:Request, res:Response){
 
   const data = await response.json();
   console.log("Server Response:", data);
-
 }
