@@ -203,6 +203,7 @@ export default function Home() {
 
   // handle voice listening
   React.useEffect(() => {
+    // Fetch assistant welcome message
     const fetchAudioStream = async () => {
       const response = await fetch("/api/voicebot");
 
@@ -211,9 +212,11 @@ export default function Home() {
         return;
       }
 
+      // Create a blobURL from the response for audio playback
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
 
+      // Play the welcome message
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
         audioRef.current
@@ -222,24 +225,32 @@ export default function Home() {
       }
     };
 
+    // Start listening for stream audio
     const startListening = async () => {
       try {
+        // Get audio stream from the microphone
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
+
+        // Create a media recorder
         const mediaRecorder = new MediaRecorder(stream);
         const audioChunks: Blob[] = [];
         let lastChunkTime = Date.now();
 
+        // Event listeners:
+        // - ondataavailable: Collect audio chunks
         mediaRecorder.ondataavailable = (event) => {
           audioChunks.push(event.data);
           lastChunkTime = Date.now();
         };
 
+        // - onstop: When the media recorder stops, send the audio to the server
         mediaRecorder.onstop = async () => {
           const audioBlob = new Blob(audioChunks, { type: "audio/mpeg" });
           const reader = new FileReader();
 
+          // When the audio is fully read, send it to the server
           reader.onloadend = async ()=>{
             const base64Audio = (reader.result as string)?.split(",")[1];
             try {
@@ -253,18 +264,33 @@ export default function Home() {
                   type:'audio/mpeg'
                 })
               });
+
+              if (!response.ok) {
+                console.error("Error fetching audio stream");
+                return;
+              }
+              
+              // Play the response transcription
+              const audioBlob = await response.blob();
+              const audioUrl = URL.createObjectURL(audioBlob);
+        
+              if (audioRef.current) {
+                audioRef.current.src = audioUrl;
+                audioRef.current
+                  .play()
+                  .catch((error) => console.error("Error playing audio:", error));
+              }
   
-              const result = await response.json();
-              console.log("Transcription Result:", result);
+              console.log("Transcription Result");
             } catch (error) {
               console.error("Error transcribing audio:", error);
             }
           }
 
+          // Read the audio blob as a data URL
           reader.readAsDataURL(audioBlob);
 
           // Restart the process
-          // startListening();
         };
 
         const checkSilence = () => {
@@ -279,6 +305,8 @@ export default function Home() {
         mediaRecorder.start();
         setIsListening(true);
         checkSilence();
+
+
       } catch (error) {
         console.error("Error accessing microphone:", error);
       }

@@ -59,10 +59,36 @@ export async function POST(req: Request, res: Response){
     body: JSON.stringify(body)
   })
 
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
+  const stream = new ReadableStream({
+    async start(controller){
+      const reader = response.body?.getReader();
 
-  const data = await response.json();
-  console.log("Server Response:", data);
+      if(!reader){
+        throw new Error("Failed to get reader from response body")
+      }
+
+      const decoder = new TextDecoder();
+      let done = false;
+
+      while(!done){
+        const{value, done:readerDone} = await reader.read();
+        done  = readerDone;
+
+        if(value){
+          controller.enqueue(value);
+        }
+      }
+      controller.close();
+    }
+  })
+
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "audio/mpeg", // Use the appropriate MIME type for your audio
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+    }
+  })
+
 }
