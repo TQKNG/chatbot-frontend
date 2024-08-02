@@ -47,18 +47,17 @@ const sampleQuestions: SampleQuestion[] = [
       "Give me 15 days temperature forecast analysis based on historical data.",
   },
 ];
-export const maxDuration = 60;
 
 export default function Home() {
   // States
   const [value, setValue] = React.useState<string>("");
   const [mode, setMode] = React.useState<number>(0); //0: text mode, 1: voice mode
   const [conversation, setConversation] = React.useState<Conversation[]>([]);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null); // use this to reset the conversation instead of refreshing the page
   const [isListening, setIsListening] = React.useState(false);
   const [isStreaming, setIsStreaming] = React.useState(true);
-  const silenceThreshold = 5000;
+  const silenceThreshold = 2000;
 
   // Handlers
   const handleInputChange = React.useCallback(
@@ -203,6 +202,7 @@ export default function Home() {
 
   // handle voice listening
   React.useEffect(() => {
+    let isProcessing = false;
     // Fetch assistant welcome message
     const fetchAudioStream = async () => {
       const response = await fetch("/api/voicebot");
@@ -247,50 +247,65 @@ export default function Home() {
 
         // - onstop: When the media recorder stops, send the audio to the server
         mediaRecorder.onstop = async () => {
+          if (!audioChunks.length) return; // No data to process
+
+          isProcessing = true; // Set flag to prevent new recordings
+
           const audioBlob = new Blob(audioChunks, { type: "audio/mpeg" });
           const reader = new FileReader();
 
           // When the audio is fully read, send it to the server
-          reader.onloadend = async ()=>{
+          reader.onloadend = async () => {
             const base64Audio = (reader.result as string)?.split(",")[1];
             try {
               const response = await fetch("/api/voicebot", {
                 method: "POST",
                 headers: {
-                  'Content-Type': 'application/json',
+                  "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                   audio: base64Audio,
-                  type:'audio/mpeg'
-                })
+                  type: "audio/mpeg",
+                }),
               });
 
               if (!response.ok) {
                 console.error("Error fetching audio stream");
+                isProcessing = false;
                 return;
               }
-              
+
               // Play the response transcription
               const audioBlob = await response.blob();
               const audioUrl = URL.createObjectURL(audioBlob);
-        
+
               if (audioRef.current) {
                 audioRef.current.src = audioUrl;
                 audioRef.current
                   .play()
-                  .catch((error) => console.error("Error playing audio:", error));
+                  .catch((error) =>
+                    console.error("Error playing audio:", error)
+                  );
               }
-  
+              // Wait until the response is done playing before restarting
+              const handleEnded = () => {
+                isProcessing = false; // Reset flag when playback is done
+                startListening(); // Restart listening
+              };
+
               console.log("Transcription Result");
+              //Remove any existing event listeners to avoid duplication
+                if (audioRef.current) {
+                  audioRef.current.removeEventListener('ended', handleEnded);
+                  audioRef.current.addEventListener('ended', handleEnded, { once: true });
+                }
             } catch (error) {
               console.error("Error transcribing audio:", error);
             }
-          }
+          };
 
           // Read the audio blob as a data URL
           reader.readAsDataURL(audioBlob);
-
-          // Restart the process
         };
 
         const checkSilence = () => {
@@ -305,8 +320,6 @@ export default function Home() {
         mediaRecorder.start();
         setIsListening(true);
         checkSilence();
-
-
       } catch (error) {
         console.error("Error accessing microphone:", error);
       }
@@ -318,14 +331,12 @@ export default function Home() {
         setIsListening(true); // Start listening after the welcome message
         startListening();
       });
-    }
-    else{
+    } else {
       setIsStreaming(false); // Stop streaming once the welcome message is done
     }
 
     return () => {
       // Cleanup code if needed
-    
     };
   }, [mode]);
 
@@ -457,7 +468,7 @@ export default function Home() {
               <h1>Chat with Voice bot</h1>
               <audio ref={audioRef} autoPlay></audio>
               {isStreaming && <p>Streaming audio...</p>}
-              {isListening && !isStreaming&& <p>Listening...</p>}
+              {isListening && !isStreaming && <p>Listening...</p>}
             </div>
           </>
         )}
