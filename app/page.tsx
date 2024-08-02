@@ -57,7 +57,7 @@ export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null); // use this to reset the conversation instead of refreshing the page
   const [isListening, setIsListening] = React.useState(false);
   const [isStreaming, setIsStreaming] = React.useState(true);
-  const silenceThreshold = 2000;
+  const silenceThreshold = 6000;
 
   // Handlers
   const handleInputChange = React.useCallback(
