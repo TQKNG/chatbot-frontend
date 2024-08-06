@@ -119,8 +119,6 @@ export default function Home() {
         }
       }
      
-     
-
       // const data = await response.json();
 
       // // Add response to conversation
@@ -153,42 +151,46 @@ export default function Home() {
     setValue("");
     setConversation([...chatHistory]);
 
-    //
-    const eventSource = new EventSource("/api/aichatbot");
+    console.log("test question front", value);
 
-    eventSource.onmessage = (event) => {
-      console.log("test event", event);
-    };
+    const response = await fetch("/api/aichatbot", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        // question: chatHistory,
+        question: value,
+      }),
+    });
 
-    eventSource.onerror = (error) => {
-      console.error("EventSource error:", error);
-      eventSource.close();
-    };
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
 
-    // // Response from AI Assistant service (API)
-    // console.log("test question front", value);
-    // const response = await fetch("/api/aichatbot", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     // question: chatHistory,
-    //     question: value,
-    //   }),
-    // });
+    if(response.body){
+      let result = "";
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
 
-    // const data = await response?.json();
-    // console.log("tesssssss", data.data.data);
+      while (true) {
+        const { done, value } = (await reader?.read()) as {
+          done: boolean;
+          value: Uint8Array;
+        }; // ts type assertion
+        if (done) break;
+        result += decoder.decode(value, { stream: true });
 
-    // setConversation((prev) =>
-    //   prev.map((item, index) => {
-    //     if (item.role === "assistant" && index === prev.length - 1) {
-    //       return { ...item, content: data.data.data?.output };
-    //     }
-    //     return item;
-    //   })
-    // );
+        setConversation((prev) =>
+          prev.map((item, index) => {
+            if (item.role === "assistant" && index === prev.length - 1) {
+              return { ...item, content: result };
+            }
+            return item;
+          })
+        );
+      }
+    }
   };
 
   // Handle quick question access
