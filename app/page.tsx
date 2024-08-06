@@ -54,6 +54,7 @@ export default function Home() {
   const [conversation, setConversation] = React.useState<Conversation[]>([]);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null); // use this to reset the conversation instead of refreshing the page
+  const [isServiceConnected, setIsServiceConnected] = React.useState(false);
   const [isListening, setIsListening] = React.useState(false);
   const [isStreaming, setIsStreaming] = React.useState(true);
   const silenceThreshold = 6000;
@@ -95,7 +96,7 @@ export default function Home() {
         throw new Error(response.statusText);
       }
 
-      if(response.body){
+      if (response.body) {
         let result = "";
         const reader = response.body?.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -107,7 +108,7 @@ export default function Home() {
           }; // ts type assertion
           if (done) break;
           result += decoder.decode(value, { stream: true });
-  
+
           setConversation((prev) =>
             prev.map((item, index) => {
               if (item.role === "assistant" && index === prev.length - 1) {
@@ -118,7 +119,7 @@ export default function Home() {
           );
         }
       }
-     
+
       // const data = await response.json();
 
       // // Add response to conversation
@@ -168,7 +169,7 @@ export default function Home() {
       throw new Error(response.statusText);
     }
 
-    if(response.body){
+    if (response.body) {
       let result = "";
       const reader = response.body?.getReader();
       const decoder = new TextDecoder("utf-8");
@@ -206,7 +207,34 @@ export default function Home() {
     setConversation([]);
   };
 
-  // handle voice listening
+  // Handle: toogle voice service connection
+  React.useEffect(() => {
+    if (mode) {
+      const connectToService = async () => {
+        const response = await fetch("/api/connection", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mode: mode,
+          }),
+        });
+
+        if (!response.ok) {
+          setIsServiceConnected(false);
+          throw new Error(`Services are not connected. ${response.statusText}`);
+        } else {
+          setIsServiceConnected(true);
+        }
+      };
+
+      connectToService();
+    }
+  }, [mode]);
+
+
+    // Handle: voice listening
   React.useEffect(() => {
     let isProcessing = false;
     // Fetch assistant welcome message
@@ -331,7 +359,7 @@ export default function Home() {
       }
     };
 
-    if (mode) {
+    if (isServiceConnected) {
       fetchAudioStream().then(() => {
         setIsStreaming(false); // Stop streaming once the welcome message is done
         setIsListening(true); // Start listening after the welcome message
@@ -344,7 +372,7 @@ export default function Home() {
     return () => {
       // Cleanup code if needed
     };
-  }, [mode]);
+  }, [isServiceConnected]);
 
   return (
     <main className="w-full flex max-h-screen flex-col items-center justify-between overflow-hidden p-10 bg-black">
@@ -467,7 +495,7 @@ export default function Home() {
               </div>
             </div>
           </>
-        ) : (
+        ) : mode === 1 && isServiceConnected ? (
           <>
             <div className="flex flex-col items-center col-span-9 text-white">
               {/* <AudioStreamPlayer text="Hello there how can I help you"/> */}
@@ -475,6 +503,13 @@ export default function Home() {
               <audio ref={audioRef} autoPlay></audio>
               {isStreaming && <p>Streaming audio...</p>}
               {isListening && !isStreaming && <p>Listening...</p>}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col items-center col-span-9 text-white">
+              {/* <AudioStreamPlayer text="Hello there how can I help you"/> */}
+              <h1>Connecting to Analytic Services</h1>
             </div>
           </>
         )}

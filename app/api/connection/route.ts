@@ -1,7 +1,7 @@
-export async function GET() {
+export async function POST() {
 
     const response = await fetch("http://127.0.0.1:8000/api/v1/connectagentservice",{
-      method:"GET",
+      method:"POST",
       headers:{
         "Content-Type":"application/json"
       }
