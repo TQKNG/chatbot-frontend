@@ -4,7 +4,6 @@ import React, { useRef } from "react";
 import CollapseMenu from "./components/CollapseMenu";
 import Chat from "./components/Chat";
 import QuestionCard from "./components/QuestionCard";
-import { AudioStreamPlayer } from "./components/AudioStreamPlayer_socket";
 
 // Types
 interface Conversation {
@@ -96,26 +95,31 @@ export default function Home() {
         throw new Error(response.statusText);
       }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder("utf-8");
-      let result = "";
-      while (true) {
-        const { done, value } = (await reader?.read()) as {
-          done: boolean;
-          value: Uint8Array;
-        }; // ts type assertion
-        if (done) break;
-        result += decoder.decode(value, { stream: true });
+      if(response.body){
+        let result = "";
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder("utf-8");
 
-        setConversation((prev) =>
-          prev.map((item, index) => {
-            if (item.role === "assistant" && index === prev.length - 1) {
-              return { ...item, content: result };
-            }
-            return item;
-          })
-        );
+        while (true) {
+          const { done, value } = (await reader?.read()) as {
+            done: boolean;
+            value: Uint8Array;
+          }; // ts type assertion
+          if (done) break;
+          result += decoder.decode(value, { stream: true });
+  
+          setConversation((prev) =>
+            prev.map((item, index) => {
+              if (item.role === "assistant" && index === prev.length - 1) {
+                return { ...item, content: result };
+              }
+              return item;
+            })
+          );
+        }
       }
+     
+     
 
       // const data = await response.json();
 
@@ -420,7 +424,7 @@ export default function Home() {
                       return (
                         <QuestionCard
                           key={index}
-                          item={item}
+                          item={item as any}
                           handleQuickQuestion={handleQuickQuestion}
                         />
                       );
