@@ -207,6 +207,28 @@ export default function Home() {
     setConversation([]);
   };
 
+  // Fetch assistant welcome message
+  const fetchAudioStream = async () => {
+    const response = await fetch("/api/voicebot");
+
+    if (!response.ok) {
+      console.error("Error fetching audio stream");
+      return;
+    }
+
+    // Create a blobURL from the response for audio playback
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    // Play the welcome message
+    if (audioRef.current) {
+      audioRef.current.src = audioUrl;
+      audioRef.current
+        .play()
+        .catch((error) => console.error("Error playing audio:", error));
+    }
+  };
+
   // Handle: toogle voice service connection
   React.useEffect(() => {
     if (mode) {
@@ -233,31 +255,9 @@ export default function Home() {
     }
   }, [mode]);
 
-
-    // Handle: voice listening
+  // Handle: voice listening
   React.useEffect(() => {
     let isProcessing = false;
-    // Fetch assistant welcome message
-    const fetchAudioStream = async () => {
-      const response = await fetch("/api/voicebot");
-
-      if (!response.ok) {
-        console.error("Error fetching audio stream");
-        return;
-      }
-
-      // Create a blobURL from the response for audio playback
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      // Play the welcome message
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl;
-        audioRef.current
-          .play()
-          .catch((error) => console.error("Error playing audio:", error));
-      }
-    };
 
     // Start listening for stream audio
     const startListening = async () => {
@@ -329,10 +329,12 @@ export default function Home() {
 
               console.log("Transcription Result");
               //Remove any existing event listeners to avoid duplication
-                if (audioRef.current) {
-                  audioRef.current.removeEventListener('ended', handleEnded);
-                  audioRef.current.addEventListener('ended', handleEnded, { once: true });
-                }
+              if (audioRef.current) {
+                audioRef.current.removeEventListener("ended", handleEnded);
+                audioRef.current.addEventListener("ended", handleEnded, {
+                  once: true,
+                });
+              }
             } catch (error) {
               console.error("Error transcribing audio:", error);
             }
