@@ -57,6 +57,7 @@ export default function Home() {
   const [isServiceConnected, setIsServiceConnected] = React.useState(false);
   const [isListening, setIsListening] = React.useState(false);
   const [isStreaming, setIsStreaming] = React.useState(true);
+  const [isProcessing, setIsProcessing] = React.useState(false);
   const silenceThreshold = 8000;
 
   // Handlers
@@ -229,6 +230,106 @@ export default function Home() {
     }
   };
 
+  // Start listening for stream audio
+  const startListening = async () => {
+    try {
+      // Get audio stream from the microphone
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
+      // Create a media recorder
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks: Blob[] = [];
+      let lastChunkTime = Date.now();
+
+      // Event listeners:
+      // - ondataavailable: Collect audio chunks
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+        lastChunkTime = Date.now();
+      };
+
+      // - onstop: When the media recorder stops, send the audio to the server
+      mediaRecorder.onstop = async () => {
+        if (!audioChunks.length) return; // No data to process
+
+        setIsProcessing((prev) => true); // Set flag to prevent new recordings
+
+        const audioBlob = new Blob(audioChunks, { type: "audio/mpeg" });
+        const reader = new FileReader();
+
+        // When the audio is fully read, send it to the server
+        reader.onloadend = async () => {
+          const base64Audio = (reader.result as string)?.split(",")[1];
+          try {
+            const response = await fetch("/api/voicebot", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                audio: base64Audio,
+                type: "audio/mpeg",
+              }),
+            });
+
+            if (!response.ok) {
+              console.error("Error fetching audio stream");
+              setIsProcessing((prev) => false);
+              return;
+            }
+
+            // Play the response transcription
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            if (audioRef.current) {
+              audioRef.current.src = audioUrl;
+              audioRef.current
+                .play()
+                .catch((error) => console.error("Error playing audio:", error));
+            }
+            // Wait until the response is done playing before restarting
+            const handleEnded = () => {
+              setIsProcessing((prev) => false); // Reset flag when playback is done
+              startListening(); // Restart listening
+            };
+
+            console.log("Transcription Result");
+            //Remove any existing event listeners to avoid duplication
+            if (audioRef.current) {
+              audioRef.current.removeEventListener("ended", handleEnded);
+              audioRef.current.addEventListener("ended", handleEnded, {
+                once: true,
+              });
+            }
+          } catch (error) {
+            console.error("Error transcribing audio:", error);
+          }
+        };
+
+        // Read the audio blob as a data URL
+        reader.readAsDataURL(audioBlob);
+      };
+
+      const checkSilence = () => {
+        if (Date.now() - lastChunkTime >= silenceThreshold) {
+          mediaRecorder.stop();
+          setIsListening(false);
+        } else {
+          setTimeout(checkSilence, 1000); // Check every second
+        }
+      };
+
+      mediaRecorder.start();
+      setIsListening(true);
+      checkSilence();
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+    }
+  };
+
   // Handle: toogle voice service connection
   React.useEffect(() => {
     if (mode) {
@@ -257,110 +358,6 @@ export default function Home() {
 
   // Handle: voice listening
   React.useEffect(() => {
-    let isProcessing = false;
-
-    // Start listening for stream audio
-    const startListening = async () => {
-      try {
-        // Get audio stream from the microphone
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-
-        // Create a media recorder
-        const mediaRecorder = new MediaRecorder(stream);
-        const audioChunks: Blob[] = [];
-        let lastChunkTime = Date.now();
-
-        // Event listeners:
-        // - ondataavailable: Collect audio chunks
-        mediaRecorder.ondataavailable = (event) => {
-          audioChunks.push(event.data);
-          lastChunkTime = Date.now();
-        };
-
-        // - onstop: When the media recorder stops, send the audio to the server
-        mediaRecorder.onstop = async () => {
-          if (!audioChunks.length) return; // No data to process
-
-          isProcessing = true; // Set flag to prevent new recordings
-
-          const audioBlob = new Blob(audioChunks, { type: "audio/mpeg" });
-          const reader = new FileReader();
-
-          // When the audio is fully read, send it to the server
-          reader.onloadend = async () => {
-            const base64Audio = (reader.result as string)?.split(",")[1];
-            try {
-              const response = await fetch("/api/voicebot", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  audio: base64Audio,
-                  type: "audio/mpeg",
-                }),
-              });
-
-              if (!response.ok) {
-                console.error("Error fetching audio stream");
-                isProcessing = false;
-                return;
-              }
-
-              // Play the response transcription
-              const audioBlob = await response.blob();
-              const audioUrl = URL.createObjectURL(audioBlob);
-
-              if (audioRef.current) {
-                audioRef.current.src = audioUrl;
-                audioRef.current
-                  .play()
-                  .catch((error) =>
-                    console.error("Error playing audio:", error)
-                  );
-              }
-              // Wait until the response is done playing before restarting
-              const handleEnded = () => {
-                isProcessing = false; // Reset flag when playback is done
-                startListening(); // Restart listening
-              };
-
-              console.log("Transcription Result");
-              //Remove any existing event listeners to avoid duplication
-              if (audioRef.current) {
-                audioRef.current.removeEventListener("ended", handleEnded);
-                audioRef.current.addEventListener("ended", handleEnded, {
-                  once: true,
-                });
-              }
-            } catch (error) {
-              console.error("Error transcribing audio:", error);
-            }
-          };
-
-          // Read the audio blob as a data URL
-          reader.readAsDataURL(audioBlob);
-        };
-
-        const checkSilence = () => {
-          if (Date.now() - lastChunkTime >= silenceThreshold) {
-            mediaRecorder.stop();
-            setIsListening(false);
-          } else {
-            setTimeout(checkSilence, 1000); // Check every second
-          }
-        };
-
-        mediaRecorder.start();
-        setIsListening(true);
-        checkSilence();
-      } catch (error) {
-        console.error("Error accessing microphone:", error);
-      }
-    };
-
     if (isServiceConnected) {
       fetchAudioStream().then(() => {
         setIsStreaming(false); // Stop streaming once the welcome message is done
