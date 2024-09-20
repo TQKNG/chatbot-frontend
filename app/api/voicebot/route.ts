@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 // Text-to-speech API
 export async function GET() {
 
-  const response = await fetch("http://127.0.0.1:8000/api/v1/test-voice",{
+  const response = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/test-voice",{
     method:"GET",
     headers:{
       "Content-Type":"application/json"
@@ -51,7 +51,7 @@ export async function GET() {
 export async function POST(req: Request, res: Response){
   const body = await req.json();
 
-  const response = await fetch("http://127.0.0.1:8000/api/v1/test-voice",{
+  const response = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/test-voice",{
     method:"POST",
     headers: {
       "Content-Type": "application/json",
