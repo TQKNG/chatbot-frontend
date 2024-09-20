@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   // applicationName: "SQL Agent Chatbot",
   // description: "A customize SQL Agent Chatbot that can help you to query your database with natural language",
   // authors: [{name:"Khanh Nguyen"}],
-  title:"Virbrix - AI Chatbot"
+  title: "Virbrix - AI Chatbot",
 };
 
 export default function RootLayout({
@@ -19,7 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        {children}
+      </body>
     </html>
   );
 }

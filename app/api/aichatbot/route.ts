@@ -6,7 +6,6 @@ export async function POST(req: Request, res: Response) {
   let response = null;
 
   console.log("test question", body);
-
   /*
     Production API service
     https://intelligenceservice.azurewebsites.net/api/v1/askagent
@@ -17,18 +16,34 @@ export async function POST(req: Request, res: Response) {
 
     */
 
-  // Set headers for Server-Sent Events
-
-  response = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/asksqlagent", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      question: body.question,
-    }),
-  });
-
+  // Routing agent
+  if (
+    body.question.includes("analysis") ||
+    body.question.includes("predict") ||
+    body.question.includes("forecast")
+  ) {
+    response = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/askdataanalysisagentv2", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        question: body.question,
+      }),
+    });
+  }else{
+    response = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/asksqlagent", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        question: body.question,
+      }),
+    });
+  
+  }
+  
   // const data = await res?.json()
   // console.log("test response", data)
 

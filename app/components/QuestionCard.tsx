@@ -1,6 +1,14 @@
 import React from "react";
 
-const QuestionCard = ({ item, handleQuickQuestion }) => {
+interface QuestionCardProps {
+  item:{
+    type: string;
+    question: string;
+  },
+  handleQuickQuestion:(question:string)=>void
+}
+
+const QuestionCard  = ({ item, handleQuickQuestion }:QuestionCardProps) => {
   return (
     <React.Fragment >
       <div

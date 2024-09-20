@@ -33,7 +33,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "build/types/**/*.ts"
-  ],
+, "app/api/voicebot/route.js", "app/api/assemblytoken/route.js", "app/components/Chat.jsx", "app/components/QuestionCard.tsx"  ],
   "exclude": [
     "node_modules"
   ]

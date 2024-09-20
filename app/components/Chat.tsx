@@ -1,6 +1,17 @@
 import React from 'react'
 
-const Chat = ({key,item}) => {
+interface ChatProps
+{
+  key:number;
+  item:{
+    role:string;
+    content:string;
+    img_url?:string;
+  }
+} 
+
+
+const Chat:React.FC<ChatProps> = ({key,item}) => {
   return (
     <React.Fragment key={key}>
     <br />
