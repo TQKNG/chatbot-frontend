@@ -38,3 +38,8 @@
 ### Added
 - Add stream response functionality
 
+## [1.0.5] - 2024-07-20
+
+### Added
+- Update voice + performance optimization
+
