@@ -12,7 +12,7 @@ const QuestionCard  = ({ item, handleQuickQuestion }:QuestionCardProps) => {
   return (
     <React.Fragment >
       <div
-        className={`card w-30 max-w-50 cursor-pointer text-white bg-secondary border-transparent hover:bg-slate-50 hover:text-black rounded-lg`}
+        className={`card w-30 max-w-50 cursor-pointer text-white bg-[#092a4d] border-transparent hover:bg-slate-50 hover:text-black rounded-lg`}
         onClick={() => handleQuickQuestion(item.question)}
       >
         <div className="card-body items-center text-center">
@@ -61,7 +61,7 @@ const QuestionCard  = ({ item, handleQuickQuestion }:QuestionCardProps) => {
             <h2 className="card-title text-nowrap">{item.type}</h2>
           </div>
 
-          <h3 className="">{item.question}</h3>
+          <h3 className="font-thin">{item.question}</h3>
         </div>
       </div>
     </React.Fragment>

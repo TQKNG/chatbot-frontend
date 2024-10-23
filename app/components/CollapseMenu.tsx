@@ -12,7 +12,7 @@ const CollapseMenu = () => {
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
-            stroke="currentColor"
+            stroke="#0098C1"
             className="size-6"
           >
             <path
@@ -37,7 +37,7 @@ const CollapseMenu = () => {
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
-                      stroke="currentColor"
+                      stroke="#0098C1"
                       className="size-4"
                     >
                       <path
