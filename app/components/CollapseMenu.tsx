@@ -13,7 +13,7 @@ const CollapseMenu = () => {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="#0098C1"
-            className="size-6"
+            className="size-6 "
           >
             <path
               strokeLinecap="round"
