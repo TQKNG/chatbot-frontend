@@ -192,6 +192,7 @@ export default function Home() {
       body: JSON.stringify({
         // question: chatHistory,
         question: value,
+        file: base64
       }),
     });
 
