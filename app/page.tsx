@@ -51,6 +51,7 @@ const sampleQuestions: SampleQuestion[] = [
 export default function Home() {
   // States
   const [value, setValue] = React.useState<string>("");
+  const [base64, setBase64] = React.useState<string | null>(null)
   const [mode, setMode] = React.useState<number>(0); //0: text mode, 1: voice mode
   const [conversation, setConversation] = React.useState<Conversation[]>([]);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
@@ -65,6 +66,31 @@ export default function Home() {
   const handleInputChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setValue(e.target.value);
+    },
+    []
+  );
+
+  const handleFileUpload = React.useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      // Convert a file to base64 string
+      const toBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file); // This will convert the file to a base64 string
+          reader.onload = () => resolve(reader.result as string); // Cast result to string
+          reader.onerror = (error) => reject(error);
+        });
+      };
+
+
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        let fileBase64 = await toBase64(files[0]);
+
+        setBase64(fileBase64)
+      } else {
+        setBase64(null)
+      }
     },
     []
   );
@@ -91,6 +117,7 @@ export default function Home() {
         body: JSON.stringify({
           // question: chatHistory,
           question: value,
+          file:base64
         }),
       });
 
@@ -119,6 +146,7 @@ export default function Home() {
               return item;
             })
           );
+
         }
       }
 
@@ -459,25 +487,25 @@ export default function Home() {
                     </label>
                   </div>
                 </div>
-                <FileUpload />
+                <FileUpload  onFileUpload={handleFileUpload} />
               </div>
 
               {/* Standard */}
               <div className="flex flex-col">
-              <div className="flex items-center justify-start gap-1 w-full">
-                <Image
-                  src="/icon-standard.png"
-                  alt="standard"
-                  width={18}
-                  height={18}
-                />
-                <div className="form-control">
-                  <label className="cursor-pointer label gap-2">
-                    <span className=" text-white">Standards</span>
-                  </label>
+                <div className="flex items-center justify-start gap-1 w-full">
+                  <Image
+                    src="/icon-standard.png"
+                    alt="standard"
+                    width={18}
+                    height={18}
+                  />
+                  <div className="form-control">
+                    <label className="cursor-pointer label gap-2">
+                      <span className=" text-white">Standards</span>
+                    </label>
+                  </div>
                 </div>
-              </div>
-              <FileUpload />
+                <FileUpload  onFileUpload={handleFileUpload}/>
               </div>
             </div>
           </div>
