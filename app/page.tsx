@@ -51,11 +51,12 @@ const sampleQuestions: SampleQuestion[] = [
 export default function Home() {
   // States
   const [value, setValue] = React.useState<string>("");
-  const [knowledgeBase, setKnowledgeBase]= React.useState<File|null>(null)
+  const [knowledgeBase, setKnowledgeBase] = React.useState<File | null>(null);
   const [mode, setMode] = React.useState<number>(0); //0: text mode, 1: voice mode
   const [conversation, setConversation] = React.useState<Conversation[]>([]);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null); // use this to reset the conversation instead of refreshing the page
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isServiceConnected, setIsServiceConnected] = React.useState(false);
   const [isListening, setIsListening] = React.useState(false);
   const [isStreaming, setIsStreaming] = React.useState(true);
@@ -73,14 +74,13 @@ export default function Home() {
   const handleFileUpload = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       // Convert a file to base64 string
-    
 
       const files = e.target.files;
       if (files && files.length > 0) {
-        setKnowledgeBase(files[0])
-        console.log("Knowledge Base", knowledgeBase)
+        setKnowledgeBase(files[0]);
+        console.log("Knowledge Base", knowledgeBase);
       } else {
-        setKnowledgeBase(null)
+        setKnowledgeBase(null);
       }
     },
     []
@@ -88,7 +88,7 @@ export default function Home() {
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      const formData=new FormData()
+      const formData = new FormData();
       // Add user message to conversation
       const chatHistory = [
         ...conversation,
@@ -99,11 +99,15 @@ export default function Home() {
       setValue("");
       setConversation([...chatHistory]);
 
-      if(knowledgeBase){
-        formData.append('knowledgeBase', knowledgeBase)
+      if (knowledgeBase) {
+        formData.append("knowledgeBase", knowledgeBase);
       }
 
-      formData.append('question',value)
+      formData.append("question", value);
+      if(fileInputRef.current){
+        setKnowledgeBase(null)
+        fileInputRef.current.value = ""
+      }
 
       const response = await fetch("/api/aichatbot", {
         method: "POST",
@@ -112,6 +116,8 @@ export default function Home() {
         // },
         body: formData,
       });
+
+   
 
       if (!response.ok) {
         throw new Error(response.statusText);
@@ -138,7 +144,6 @@ export default function Home() {
               return item;
             })
           );
-
         }
       }
 
@@ -164,6 +169,8 @@ export default function Home() {
   };
 
   const handleSend = async () => {
+    const formData = new FormData();
+
     // Add user message to conversation
     const chatHistory = [
       ...conversation,
@@ -174,17 +181,22 @@ export default function Home() {
     setValue("");
     setConversation([...chatHistory]);
 
-    console.log("test question front", value);
+    if (knowledgeBase) {
+      formData.append("knowledgeBase", knowledgeBase);
+    }
+
+    formData.append("question", value);
+    if(fileInputRef.current){
+      setKnowledgeBase(null)
+      fileInputRef.current.value = ""
+    }
 
     const response = await fetch("/api/aichatbot", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        // question: chatHistory,
-        question: value,
-      }),
+      // headers: {
+      //   "Content-Type": "application/json",
+      // },
+      body: formData,
     });
 
     if (!response.ok) {
@@ -377,8 +389,6 @@ export default function Home() {
     }
   }, [mode]);
 
-  
-
   // Handle: voice listening
   React.useEffect(() => {
     if (isServiceConnected) {
@@ -403,6 +413,13 @@ export default function Home() {
       <div className="w-full h-screen grid md:grid-cols-12 gap-2 relative z-10">
         {/* Left-side panel*/}
         <div className="col-span-3 bg-primary p-10 rounded-md">
+          {/* Welcome Panel */}
+          <div className="flex items-center flex-col justify-start gap-4 w-full text-secondary mb-4">
+            <div className="self-start w-full text-left font-medium">
+              General
+            </div>
+          </div>
+
           {/*New Chat */}
           <div
             className="flex items-center justify-start gap-4 w-full cursor-pointer hover:text-aquaTurquoise text-white"
@@ -428,78 +445,82 @@ export default function Home() {
           </div>
           {/* Section: Database Connection */}
           <div>
-            <CollapseMenu />
+            <CollapseMenu
+              title={"Connection to Database"}
+              menuItem={[
+                "Health & Safety",
+                "Occupancy",
+                "Sustainability",
+                "Physical Security",
+              ]}
+            />
+          </div>
+          {/* Chat mode toggle */}
+          <div className="flex items-center justify-start gap-4 w-full">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#0098C1"
+            >
+              <path d="M240-520h60v-80h-60v80Zm100 80h60v-240h-60v240Zm110 80h60v-400h-60v400Zm110-80h60v-240h-60v240Zm100-80h60v-80h-60v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z" />
+            </svg>
+            <div className="form-control">
+              <label className="flex justify-between gap-4 cursor-pointer">
+                <span className=" text-white">Voice Mode</span>
+                <input
+                  type="checkbox"
+                  className="toggle toggle-accent toggle-sm"
+                  checked={mode ? true : false}
+                  onChange={(e) => setMode(e.target.checked ? 1 : 0)}
+                />
+              </label>
+            </div>
           </div>
 
-          {/* Other Configuration */}
-          <div className="flex items-center flex-col justify-start gap-4 w-full text-white mt-7">
+          {/* Organization Settings */}
+          <div className="flex items-center flex-col justify-start gap-4 w-full text-secondary mt-7">
             <div className="self-start w-full text-left font-medium">
-              Settings
+              Data Analytics
             </div>
 
             {/* Sub-menu */}
-            <div className="w-full text-sm flex flex-col  justify-start gap-4 pl-3">
-              {/* Chat mode toggle */}
-              <div className="flex items-center justify-start gap-1 w-full">
+            <div className="w-full  flex flex-col  justify-start gap-4 ">
+              {/* Knowledge Base */}
+              <div className="flex items-center justify-start gap-4 w-full">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  height="20px"
+                  height="24px"
                   viewBox="0 -960 960 960"
-                  width="20px"
+                  width="24px"
                   fill="#0098C1"
                 >
                   <path d="M240-520h60v-80h-60v80Zm100 80h60v-240h-60v240Zm110 80h60v-400h-60v400Zm110-80h60v-240h-60v240Zm100-80h60v-80h-60v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z" />
                 </svg>
                 <div className="form-control">
-                  <label className="cursor-pointer label gap-2">
-                    <span className=" text-white">Voice Mode</span>
+                  <label className="flex justify-between gap-4 cursor-pointer">
+                    <span className=" text-white">Knowledge Base</span>
                     <input
                       type="checkbox"
                       className="toggle toggle-accent toggle-sm"
-                      checked={mode ? true : false}
-                      onChange={(e) => setMode(e.target.checked ? 1 : 0)}
                     />
                   </label>
                 </div>
               </div>
 
-              {/* Knowledge Base */}
-              <div className="flex flex-col">
-                <div className="flex items-center justify-start gap-1 w-full">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="20px"
-                    viewBox="0 -960 960 960"
-                    width="20px"
-                    fill="#0098C1"
-                  >
-                    <path d="M240-80v-172q-57-52-88.5-121.5T120-520q0-150 105-255t255-105q125 0 221.5 73.5T827-615l52 205q5 19-7 34.5T840-360h-80v120q0 33-23.5 56.5T680-160h-80v80h-80v-160h160v-200h108l-38-155q-23-91-98-148t-172-57q-116 0-198 81t-82 197q0 60 24.5 114t69.5 96l26 24v208h-80Zm254-360Zm-54 80h80l6-50q8-3 14.5-7t11.5-9l46 20 40-68-40-30q2-8 2-16t-2-16l40-30-40-68-46 20q-5-5-11.5-9t-14.5-7l-6-50h-80l-6 50q-8 3-14.5 7t-11.5 9l-46-20-40 68 40 30q-2 8-2 16t2 16l-40 30 40 68 46-20q5 5 11.5 9t14.5 7l6 50Zm40-100q-25 0-42.5-17.5T420-520q0-25 17.5-42.5T480-580q25 0 42.5 17.5T540-520q0 25-17.5 42.5T480-460Z" />
-                  </svg>
-                  <div className="form-control">
-                    <label className="cursor-pointer label gap-2">
-                      <span className="text-white">Knowledge Base</span>
-                    </label>
-                  </div>
-                </div>
-                <FileUpload  onFileUpload={handleFileUpload} />
-              </div>
-
               {/* Standard */}
-              <div className="flex flex-col">
-                <div className="flex items-center justify-start gap-1 w-full">
-                  <Image
-                    src="/icon-standard.png"
-                    alt="standard"
-                    width={18}
-                    height={18}
-                  />
-                  <div className="form-control">
-                    <label className="cursor-pointer label gap-2">
-                      <span className=" text-white">Standards</span>
-                    </label>
-                  </div>
-                </div>
-                <FileUpload  onFileUpload={handleFileUpload}/>
+              {/* Section: Database Connection */}
+              <div>
+                <CollapseMenu
+                  title={"Standards"}
+                  menuItem={[
+                    "WELL 2.0 Standard",
+                    "ASHRAE Standard",
+                    "LEED Standard",
+                    "SmartScore/WiredScore Standard",
+                  ]}
+                />
               </div>
             </div>
           </div>
@@ -544,11 +565,35 @@ export default function Home() {
 
               {/* Section: Chat */}
               <div className="w-full flex flex-col items-center justify-center text-white">
+                 <span>{knowledgeBase?knowledgeBase?.name:null}</span>
                 {/* User input */}
                 <div className="relative flex justify-center items-center w-full max-w-4xl">
+                  {/* Attachment doc */}
+                  <div
+                    className="flex items-center absolute cursor-pointer left-1"
+                    onClick={()=>{
+                      fileInputRef.current?.click();
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24px"
+                      viewBox="0 -960 960 960"
+                      width="24px"
+                      fill="white"
+                      className=" hover:opacity-80"
+                      onClick={() => {
+                        console.log("test click");
+                      }}
+                    >
+                      <path d="M720-330q0 104-73 177T470-80q-104 0-177-73t-73-177v-370q0-75 52.5-127.5T400-880q75 0 127.5 52.5T580-700v350q0 46-32 78t-78 32q-46 0-78-32t-32-78v-370h80v370q0 13 8.5 21.5T470-320q13 0 21.5-8.5T500-350v-350q-1-42-29.5-71T400-800q-42 0-71 29t-29 71v370q-1 71 49 120.5T470-160q70 0 119-49.5T640-330v-390h80v390Z" />
+                    </svg>
+                  </div>
+
+                  {/* Chat input */}
                   <input
                     placeholder="Ask me anything about your database"
-                    className="w-full max-w-4xl input border-white bg-transparent"
+                    className="w-full max-w-4xl input border-white bg-transparent pl-10"
                     value={value}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
@@ -556,7 +601,7 @@ export default function Home() {
 
                   {/* Send Button */}
                   <Image
-                    className="absolute cursor-pointer right-0 hover:opacity-80"
+                    className="absolute cursor-pointer right-1 hover:opacity-80"
                     src="/icon-send.png"
                     alt="btn-send"
                     width={50}
@@ -565,6 +610,7 @@ export default function Home() {
                     onClick={handleSend}
                   />
                 </div>
+                <FileUpload onFileUpload={handleFileUpload} fileInputRef={fileInputRef}  />
               </div>
             </div>
           </>
