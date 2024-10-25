@@ -3,15 +3,6 @@ import type { IncomingMessage } from "http";
 export const dynamic = "force-dynamic";
 
 
-// Disable body parsing by Next.js, since we're handling it manually
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-
-
 export async function POST(req: Request, res: Response) {
   // const body = await req.json();
   const formData = await req.formData()
