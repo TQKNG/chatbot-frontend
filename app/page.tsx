@@ -51,7 +51,7 @@ const sampleQuestions: SampleQuestion[] = [
 export default function Home() {
   // States
   const [value, setValue] = React.useState<string>("");
-  const [base64, setBase64] = React.useState<string | null>(null)
+  const [knowledgeBase, setKnowledgeBase]= React.useState<File|null>(null)
   const [mode, setMode] = React.useState<number>(0); //0: text mode, 1: voice mode
   const [conversation, setConversation] = React.useState<Conversation[]>([]);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
@@ -71,25 +71,16 @@ export default function Home() {
   );
 
   const handleFileUpload = React.useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       // Convert a file to base64 string
-      const toBase64 = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file); // This will convert the file to a base64 string
-          reader.onload = () => resolve(reader.result as string); // Cast result to string
-          reader.onerror = (error) => reject(error);
-        });
-      };
-
+    
 
       const files = e.target.files;
       if (files && files.length > 0) {
-        let fileBase64 = await toBase64(files[0]);
-
-        setBase64(fileBase64)
+        setKnowledgeBase(files[0])
+        console.log("Knowledge Base", knowledgeBase)
       } else {
-        setBase64(null)
+        setKnowledgeBase(null)
       }
     },
     []
@@ -97,6 +88,7 @@ export default function Home() {
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
+      const formData=new FormData()
       // Add user message to conversation
       const chatHistory = [
         ...conversation,
@@ -107,18 +99,18 @@ export default function Home() {
       setValue("");
       setConversation([...chatHistory]);
 
-      console.log("test question front", value);
+      if(knowledgeBase){
+        formData.append('knowledgeBase', knowledgeBase)
+      }
+
+      formData.append('question',value)
 
       const response = await fetch("/api/aichatbot", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          // question: chatHistory,
-          question: value,
-          file:base64
-        }),
+        // headers: {
+        //   "Content-Type": "application/json",
+        // },
+        body: formData,
       });
 
       if (!response.ok) {
@@ -192,7 +184,6 @@ export default function Home() {
       body: JSON.stringify({
         // question: chatHistory,
         question: value,
-        file: base64
       }),
     });
 
@@ -385,6 +376,8 @@ export default function Home() {
       connectToService();
     }
   }, [mode]);
+
+  
 
   // Handle: voice listening
   React.useEffect(() => {
