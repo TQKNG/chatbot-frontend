@@ -43,3 +43,8 @@
 ### Added
 - Update voice + performance optimization
 
+## [1.0.6] - 2024-10-25
+
+### Added
+- Update UI for Demo and add Upload document functionalities
+
