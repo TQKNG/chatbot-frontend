@@ -39,13 +39,13 @@ export async function POST(req: Request, res: Response) {
     question.includes("forecast"))
   ) {
  
-    response = await fetch(" http://127.0.0.1:8000/api/v1/askdataanalysisagentv2", {
+    response = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/askdataanalysisagentv2", {
       method: "POST",
       body: formData,
     });
   }else{
     console.log("test form data front end", formData)
-    response = await fetch("http://127.0.0.1:8000/api/v1/asksqlagent", {
+    response = await fetch(" https://intelligenceservice.azurewebsites.net/api/v1/asksqlagent", {
       method: "POST",
       body: formData,
     });
