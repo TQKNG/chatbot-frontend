@@ -25,8 +25,8 @@ const Chat:React.FC<ChatProps> = ({key,item}) => {
             />
           </div>
         </div>
-        <div className="flex flex-col chat-bubble max-w-[400px]">
-          <strong className="badge bg-aquaTurquoise text-black">
+        <div className="flex flex-col bg-primary chat-bubble max-w-[400px]">
+          <strong className="badge bg-secondary text-white border-none">
             {/* ChatBOK */}
             Virbrix
           </strong>
@@ -59,7 +59,7 @@ const Chat:React.FC<ChatProps> = ({key,item}) => {
             />
           </div>
         </div>
-        <div className="chat-bubble bg-aquaTurquoise text-black max-w-[400px]">
+        <div className="chat-bubble bg-transparent text-white max-w-[400px]">
           <strong className="badge ">User</strong>
           <br />
           <div>{item?.content}</div>

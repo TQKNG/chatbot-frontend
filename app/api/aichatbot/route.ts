@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
+import type { IncomingMessage } from "http";
 export const dynamic = "force-dynamic";
 
+
 export async function POST(req: Request, res: Response) {
-  const body = await req.json();
+  // const body = await req.json();
+  const formData = await req.formData()
+
+  const question = formData.get("question")
+  const file = formData.get('knowledgeBase')
   let response = null;
 
-  console.log("test question", body);
+  console.log("test question", question)
+
   /*
     Production API service
     https://intelligenceservice.azurewebsites.net/api/v1/askagent
@@ -17,29 +24,21 @@ export async function POST(req: Request, res: Response) {
     */
 
   // Routing agent
-  if (
-    body.question.includes("analysis") ||
-    body.question.includes("predict") ||
-    body.question.includes("forecast")
+  if (typeof question === "string" &&
+    (question.includes("analysis") || 
+     question.includes("predict") || 
+     question.includes("forecast"))
   ) {
+ 
     response = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/askdataanalysisagentv2", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        question: body.question,
-      }),
+      body: formData,
     });
   }else{
-    response = await fetch("https://intelligenceservice.azurewebsites.net/api/v1/asksqlagent", {
+    console.log("test form data front end", formData)
+    response = await fetch(" https://intelligenceservice.azurewebsites.net/api/v1/asksqlagent", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        question: body.question,
-      }),
+      body: formData,
     });
   
   }
